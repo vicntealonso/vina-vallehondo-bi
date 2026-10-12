@@ -1,0 +1,85 @@
+producto_id;producto;cepa;tier;formato;litros_por_caja;anada;costo_caja_clp;activo
+1;Cabernet Sauvignon Varietal;Cabernet Sauvignon;Varietal;12x750;9,0;2021;13.734;si
+1;Cabernet Sauvignon Varietal;Cabernet;Varietal;12x750;9,0;2022;13.356,00;si
+1;Cabernet Sauvignon Varietal;Cabernet;Varietal;12x750;9,0;2023;12978;SI
+1;Cabernet Sauvignon Varietal;Cabernet;Varietal;12x750;9,0;2024;12600;si
+2;Cabernet Sauvignon Reserva;Cabernet Sauvignon;Reserva;12x750;9,0;2022;20988;SI
+2;Cabernet Sauvignon Reserva;CS;Reserva;12x750;9,0;2023;20394;si
+2;Cabernet Sauvignon Reserva;CS;Reserva;12x750;9,0;2024;;SI
+3;Cabernet Sauvignon Gran Reserva;Cabernet;Gran Reserva;12x750;9,0;2022;34344;1
+3;Cabernet Sauvignon Gran Reserva;CS;Gran Reserva;12x750;9,0;2023;33372;si
+3;Cabernet Sauvignon Gran Reserva;Cab Sauv;Gran Reserva;12x750;9,0;2024;32.400,00;si
+4;Merlot Varietal;merlot;Varietal;12x750;9,0;2021;13.734;SI
+producto_id;producto;cepa;tier;formato;litros_por_caja;anada;costo_caja_clp;activo
+4;Merlot Varietal;merlot;Varietal;12x750;9,0;2022;13.356,00;Sí
+4;Merlot Varietal;Merlot;Varietal;12x750;9,0;2023;12.978,00;si
+4;Merlot Varietal;Merlot;Varietal;12x750;9,0;2024;12.600,00;si
+5;Merlot Reserva;Merlot;Reserva;12x750;9,0;2022;20.988;1
+5;Merlot Reserva;merlot;Reserva;12x750;9,0;2023;20.394,00;1
+5;Merlot Reserva;merlot;Reserva;12x750;9,0;2024;19.800;1
+6;Merlot Gran Reserva;merlot;Gran Reserva;12x750;9,0;2022;34344;si
+6;Merlot Gran Reserva;merlot;Gran Reserva;12x750;9,0;2023;33.372,00;SI
+6;Merlot Gran Reserva;MER;Gran Reserva;12x750;9,0;2024;32400;Sí
+7;Carménère Varietal;Carmenere;Varietal;12x750;9,0;2022;13.356;SI
+7;Carménère Varietal;CAR;Varietal;12x750;9,0;2023;12978;si
+7;Carménère Varietal;Carmenère;Varietal;12x750;9,0;2024;12.600,00;si
+8;Carménère Reserva;Carménère;Reserva;12x750;9,0;2021;21.582,00;SI
+8;Carménère Reserva;Carménère;Reserva;12x750;9,0;2022;20988;1
+8;Carménère Reserva;Carmenere;Reserva;12x750;9,0;2023;20.394;si
+8;Carménère Reserva;Carménère;Reserva;12x750;9,0;2024;19.800;si
+9;Carménère Gran Reserva;Carmenere;Gran Reserva;12x750;9,0;2021;35.316;si
+9;Carménère Gran Reserva;Carmenere;Gran Reserva;12x750;9,0;2022;34.344,00;SI
+9;Carménère Gran Reserva;Carmenere;Gran Reserva;12x750;9,0;2023;33372;SI
+9;Carménère Gran Reserva;CAR;Gran Reserva;12x750;9,0;2024;32.400,00;1
+10;Syrah Varietal;Syrah;Varietal;12x750;9,0;2022;13356;Sí
+10;Syrah Varietal;Shiraz;Varietal;12x750;9,0;2023;12.978;SI
+10;Syrah Varietal;Syrah;Varietal;12x750;9,0;2024;12.600,00;SI
+11;Syrah Reserva;Syrah;Reserva;12x750;9,0;2021;21.582;SI
+11;Syrah Reserva;Shiraz;Reserva;12x750;9,0;2022;20.988;Sí
+11;Syrah Reserva;Syrah;Reserva;12x750;9,0;2023;20.394,00;si
+11;Syrah Reserva;Shiraz;Reserva;12x750;9,0;2024;19.800,00;Sí
+12;Syrah Gran Reserva;Syrah;Gran Reserva;12x750;9,0;2022;34.344;si
+12;Syrah Gran Reserva;Syrah;Gran Reserva;12x750;9,0;2023;33.372;1
+12;Syrah Gran Reserva;Syrah;Gran Reserva;12x750;9,0;2024;32.400;1
+13;Pinot Noir Varietal;PN;Varietal;12x750;9,0;2022;13356;si
+13;Pinot Noir Varietal;PN;Varietal;12x750;9,0;2023;12.978;Sí
+13;Pinot Noir Varietal;Pinot Noir;Varietal;12x750;9,0;2024;12.600;Sí
+14;Pinot Noir Reserva;PN;Reserva;12x750;9,0;2021;21.582;1
+14;Pinot Noir Reserva;PN;Reserva;12x750;9,0;2022;20.988;SI
+14;Pinot Noir Reserva;PN;Reserva;12x750;9,0;2023;20.394,00;si
+14;Pinot Noir Reserva;PN;Reserva;12x750;9,0;2024;19.800;Sí
+15;Pinot Noir Gran Reserva;Pinot Noir;Gran Reserva;12x750;9,0;2022;34.344;1
+15;Pinot Noir Gran Reserva;Pinot Noir;Gran Reserva;12x750;9,0;2023;33.372;si
+15;Pinot Noir Gran Reserva;PN;Gran Reserva;12x750;9,0;2024;32.400;SI
+16;Chardonnay Varietal;chardonay;Varietal;12x750;9,0;2022;13.356,00;Sí
+16;Chardonnay Varietal;chardonay;Varietal;12x750;9,0;2023;12.978;1
+16;Chardonnay Varietal;CHA;Varietal;12x750;9,0;2024;12.600;Sí
+17;Chardonnay Reserva;CHA;Reserva;12x750;9,0;2021;21582;Sí
+17;Chardonnay Reserva;CHA;Reserva;12x750;9,0;2022;20.988,00;Sí
+17;Chardonnay Reserva;chardonay;Reserva;12x750;9,0;2023;20394;1
+17;Chardonnay Reserva;CHA;Reserva;12x750;9,0;2024;19800;Sí
+18;Chardonnay Gran Reserva;chardonay;Gran Reserva;12x750;9,0;2021;35.316,00;1
+18;Chardonnay Gran Reserva;Chardonnay;Gran Reserva;12x750;9,0;2022;34344;SI
+18;Chardonnay Gran Reserva;CHA;Gran Reserva;12x750;9,0;2023;33.372,00;si
+18;Chardonnay Gran Reserva;CHA;Gran Reserva;12x750;9,0;2024;32400;Sí
+19;Sauvignon Blanc Varietal;Sauvignon Blanc;Varietal;12x750;9,0;2022;13.356,00;si
+19;Sauvignon Blanc Varietal;Sauv Blanc;Varietal;12x750;9,0;2023;12978;1
+19;Sauvignon Blanc Varietal;SB;Varietal;12x750;9,0;2024;12.600,00;SI
+20;Sauvignon Blanc Reserva;Sauv Blanc;Reserva;12x750;9,0;2021;21.582,00;si
+20;Sauvignon Blanc Reserva;SB;Reserva;12x750;9,0;2022;20.988;si
+20;Sauvignon Blanc Reserva;SB;Reserva;12x750;9,0;2023;20.394,00;SI
+20;Sauvignon Blanc Reserva;Sauv Blanc;Reserva;12x750;9,0;2024;19800;si
+21;Sauvignon Blanc Gran Reserva;Sauvignon Blanc;Gran Reserva;12x750;9,0;2022;34344;SI
+21;Sauvignon Blanc Gran Reserva;Sauvignon Blanc;Gran Reserva;12x750;9,0;2023;33.372;si
+21;Sauvignon Blanc Gran Reserva;SB;Gran Reserva;12x750;9,0;2024;32.400;si
+22;Cabernet Sauvignon Gran Reserva Magnum;Cab Sauv;Gran Reserva;6x1500;9,0;2022;34.344;1
+22;Cabernet Sauvignon Gran Reserva Magnum;Cab Sauv;Gran Reserva;6x1500;9,0;2023;33.372;SI
+22;Cabernet Sauvignon Gran Reserva Magnum;Cabernet;Gran Reserva;6x1500;9,0;2024;32.400;1
+23;Carménère Gran Reserva Magnum;Carmenere;Gran Reserva;6x1500;9,0;2022;34344;1
+23;Carménère Gran Reserva Magnum;Carmenere;Gran Reserva;6x1500;9,0;2023;33.372;si
+23;Carménère Gran Reserva Magnum;Carmenere;Gran Reserva;6x1500;9,0;2024;32400;Sí
+24;Chardonnay Gran Reserva Magnum;chardonay;Gran Reserva;6x1500;9,0;2021;35.316,00;SI
+24;Chardonnay Gran Reserva Magnum;CHA;Gran Reserva;6x1500;9,0;2022;34.344;SI
+24;Chardonnay Gran Reserva Magnum;Chardonnay;Gran Reserva;6x1500;9,0;2023;33.372,00;Sí
+24;Chardonnay Gran Reserva Magnum;chardonay;Gran Reserva;6x1500;9,0;2024;32.400;si
+TOTAL;;;;;;;;

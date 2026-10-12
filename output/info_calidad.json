@@ -1,0 +1,39 @@
+{
+  "costos": {
+    "filas_csv": 84,
+    "filas_no_dato": 2,
+    "combinaciones_producto_anada": 82,
+    "costos_vacios": 1
+  },
+  "embarques": {
+    "embarques": 3052,
+    "embarque_id_repetidos": 15,
+    "lineas": 10776,
+    "lineas_fecha_2026": 735,
+    "embarques_a_valparaiso": 15,
+    "incoterms": {
+      "CIF": 1250,
+      "FOB": 1213,
+      "FCA": 589
+    }
+  },
+  "ventas": {
+    "filas_ventas": 13898,
+    "filas_duplicadas": 137,
+    "duplicados_con_diferencias": 8,
+    "fechas_2026": 82,
+    "corr_venta_id_fecha": 0.99987,
+    "mes_erp_no_coincide": 882,
+    "mercados_zona_inexistente": [
+      "Corea del Sur"
+    ]
+  },
+  "calidad": {
+    "dias_factura_a_embarque_mediana": 30.0,
+    "pct_embarque_antes_de_factura": 29.92286962178236,
+    "lineas_descarte": 109,
+    "lineas_fecha_imputada": 82,
+    "lineas_dolar_respaldo": 44
+  },
+  "dolar": "2024: no disponible, 2025: caché local, 2026: caché local"
+}

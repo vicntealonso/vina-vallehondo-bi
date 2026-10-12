@@ -1,0 +1,14 @@
+﻿concepto,lineas,pct_sobre_origen
+Filas en origen (tabla ventas),13898,100.0
+Duplicados eliminados (mismo venta_id),137,0.9857533458051518
+Líneas únicas,13761,99.01424665419485
+Fuera del margen: sin_costo_para_la_anada,1910,13.742984602101021
+Fuera del margen: monto_no_calza,776,5.583537199597064
+Fuera del margen: sin_moneda,688,4.950352568714924
+Fuera del margen: cajas_no_calzan_con_embarque,43,0.30939703554468273
+Líneas dentro del margen (todos los mercados),10344,74.42797524823716
+Fuera del volumen: cajas_registradas_en_botellas,125,0.8994099870484962
+Fuera del volumen: cajas_no_calzan_con_embarque,56,0.4029356741977263
+Líneas dentro del volumen (todos los mercados),13580,97.71190099294863
+Líneas únicas de exportación,10761,77.42840696503094
+Líneas de exportación dentro del margen,8095,58.24579076126062

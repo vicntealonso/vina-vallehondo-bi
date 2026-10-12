@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+.Rhistory
+~$*
+informe/_informe_render.html
+
+# Material del curso y documentos internos (no son parte de la cadena)
+/Enunciado_E1_P1_Proyecto_BI.pdf
+/transcripcion_oficial_vina.txt
+/info.txt
+/Acta de Constitución.docx
+/to_do.txt
+/README_caso.md
+# Copias originales: la cadena lee data/raw/
+/origen_vina.sqlite
+/origen_costos_productos.csv
+/origen_embarques.json
