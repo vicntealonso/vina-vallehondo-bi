@@ -45,7 +45,7 @@ def _descargar_dolar(anio: int) -> list[dict]:
     url = config.API_DOLAR.format(anio=anio)
     for intento in range(2):
         try:
-            r = requests.get(url, timeout=15)
+            r = requests.get(url, timeout=10)
             r.raise_for_status()
             return r.json()["serie"]
         except Exception:
@@ -67,6 +67,7 @@ def leer_dolar(offline: bool = False) -> tuple[pd.DataFrame, str]:
             cache.write_text(json.dumps(serie), encoding="utf-8")
             origenes.append(f"{anio}: API")
         except RuntimeError:
+            offline = True  # si la API falla una vez, el resto de los años se lee de la caché
             if not cache.exists():
                 if anio in config.ANIOS_DOLAR_OPCIONALES:
                     origenes.append(f"{anio}: no disponible")
