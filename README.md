@@ -104,3 +104,14 @@ python informe/build_pdf.py
 ```
 
 La fuente es `informe/informe.html`. Los archivos `informe/*.md` son los borradores extendidos de las secciones C, D y E y de los anexos.
+
+## Presentación (P1)
+
+`presentacion/Presentacion_P1_Vallehondo_V1.pptx`: 6 láminas, con el guion de cada una y las respuestas preparadas para la contraparte en las notas del orador. Los gráficos son nativos de PowerPoint y sus cifras salen de `output/resumen.md`.
+
+Para regenerarla (requiere Node.js y `pptxgenjs`):
+
+```bash
+npm install pptxgenjs
+NODE_PATH=./node_modules APPLY_THEME=<ruta a apply_theme.js> node presentacion/build_deck.js
+```

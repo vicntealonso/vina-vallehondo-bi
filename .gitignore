@@ -17,3 +17,5 @@ informe/_informe_render.html
 /origen_vina.sqlite
 /origen_costos_productos.csv
 /origen_embarques.json
+node_modules/
+presentacion/_qa.pdf
