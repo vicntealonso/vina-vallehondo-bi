@@ -107,6 +107,8 @@ La fuente es `informe/informe.html`. Los archivos `informe/*.md` son los borrado
 
 ## Presentación (P1)
 
+**Ver en Canva:** https://canva.link/d2natqf6526guqr
+
 `presentacion/Presentacion_P1_Vallehondo_V1.pptx`: 6 láminas, con el guion de cada una y las respuestas preparadas para la contraparte en las notas del orador. Los gráficos son nativos de PowerPoint y sus cifras salen de `output/resumen.md`.
 
 Para regenerarla (requiere Node.js y `pptxgenjs`):
