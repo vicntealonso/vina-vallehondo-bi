@@ -162,9 +162,9 @@ Esto confirma lo que nos dijeron en la reunión: el descuento especial lo decidi
 
   // ---------------------------------------------------------------- 4. Caso de negocio
   s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "Evidencia" });
-  s.addText("El descuento costó más de lo que dejó el crecimiento", { placeholder: "title" });
+  s.addText("Topar el descuento de Corea del Sur en 8 % recupera ~286 MM CLP al año", { placeholder: "title" });
   s.addChart(pres.charts.BAR, [
-    { name: "MM CLP", labels: ["Costo del descuento extra", "Margen de los litros extra del S2"], values: [569, 371] },
+    { name: "MM CLP", labels: ["Descuento extra pagado en 2025", "Recuperable con tope de 8 %"], values: [569, 286] },
   ], { x: 0.5, y: 1.5, w: 5.6, h: 5.2, objectName: "grafico_pesos", ...ejesSuaves,
     barDir: "col", barGapWidthPct: 55, chartColors: [HX.coral], showLegend: false,
     showTitle: true, title: "Corea del Sur, 2025 (millones de CLP)", titleFontSize: 15, titleColor: HX.tinta,
@@ -182,12 +182,13 @@ Esto confirma lo que nos dijeron en la reunión: el descuento especial lo decidi
     s.addText(head, { x: 7.35, y: y - 0.05, w: 5.45, h: 0.75, fontSize: 18, bold: true, color: C.text2, margin: 0, valign: "top", isTextBox: true });
     s.addText(body, { x: 7.35, y: y + 0.72, w: 5.45, h: 0.75, fontSize: 15, color: C.text1, margin: 0, valign: "top", isTextBox: true });
   });
-  s.addNotes(`(~75 s) Traducido a plata: el descuento extra que recibe Corea, por sobre lo que reciben los demás mercados, costó 569 millones de pesos en 2025. Y los 217 mil litros adicionales que Corea compró en el segundo semestre dejaron 371 millones de margen. El descuento costó más de lo que dejó el crecimiento que trajo.
-(569 es un piso: solo cuenta las líneas con margen calculable, el 73 % de los litros de Corea; extrapolado serían ~776 MM.)
+  s.addNotes(`(~80 s) En pesos: el descuento extra que recibe Corea, por sobre lo que reciben los demás mercados, costó 569 millones de pesos en 2025.
+Si ese descuento tuviera un tope de 8 %, que es el máximo que tienen los demás mercados, la viña recuperaría unos 286 millones al año con el mismo volumen. Y sigue conviniendo aunque Corea compre hasta 13 % menos; hoy crece 34 %.
 Por eso recomendamos tres cosas:
-1) Topar el descuento de Corea en 8 %, el máximo que tienen los demás mercados. Con el mismo volumen recupera 286 millones al año, y sigue conviniendo aunque Corea compre hasta 13 % menos.
+1) Topar el descuento de Corea en 8 % en los contratos 2026.
 2) Poner el esfuerzo en México y Brasil, que crecen con buen margen. En Brasil, ojo: su cuarto trimestre quedó bajo el primero.
-3) Que cada descuento especial se apruebe mirando el margen por litro y no solo los litros. Y corregir el ERP: le entregamos a Finanzas 1.507 venta_id para cotejar.`);
+3) Que cada descuento especial se apruebe mirando el margen por litro y no solo los litros. Y corregir el ERP: le entregamos a Finanzas 1.507 venta_id para cotejar.
+REFERENCIA (solo si preguntan): los litros adicionales del S2 dejaron 371 MM de margen, menos que los 569 del descuento; pero eso supone que sin descuento Corea no habría crecido. El 569 es un piso: cubre el 73 % de los litros de Corea; extrapolado, ~776 MM.`);
 
   // ---------------------------------------------------------------- 5. Definición
   pres.addSection({ title: "Definición" });
@@ -211,7 +212,9 @@ PREGUNTAS PROBABLES:
 - ¿Y la fecha de cobro (60/90 días)? No hay registro por venta, solo una regla verbal; es la pregunta P4, fuera de alcance. Como la fecha de embarque ya está ~30 días después y no cambia nada, otro desfase parecido tampoco debería.
 - ¿Por qué semestres? No hay año anterior. Con T4 vs T1, Corea crece +58 % y México +3 %; Brasil pasa a no crecer (−3,8 %).
 - ¿Qué es "buen margen"? No hay meta oficial: usamos el promedio de exportación (2.199 CLP/L). Con la mediana (2.261), Brasil quedaría bajo; Corea queda lejos de cualquier umbral.
-- ¿Y el flete? No está en los datos y no lo van a enviar: el margen es antes de flete. Si llegar a Corea cuesta más, su margen real es aún menor.`);
+- ¿Y el flete? No está en los datos y no lo van a enviar: el margen es antes de flete. Si llegar a Corea cuesta más, su margen real es aún menor.
+- ¿No es estacional el crecimiento de Corea? No: Japón (−7 %) y China (−10 %), en la misma región y estación, bajan; Corea sube mes a mes (de ~104 mil litros en enero a ~151 mil en diciembre).
+- ¿Por qué no P2, si les importa el tier? P2 explica el precio promedio de la empresa, no dónde poner el esfuerzo. Igual miramos el tier: la mezcla es casi idéntica entre mercados (24–28 % gran reserva), así que no explica las diferencias de margen.`);
 
   // ---------------------------------------------------------------- 6. Modelo (única lámina técnica)
   pres.addSection({ title: "Modelo" });

@@ -25,7 +25,7 @@ Las cuatro visualizaciones salen de `run.py` y se guardan en `output/figuras/`. 
 | Margen que se recuperaría si el descuento de Corea del Sur tuviera un tope de 8 %, el máximo de los demás mercados, con el mismo volumen | **286 millones de CLP** | Medido |
 | Volumen que Corea del Sur podría perder con ese tope de 8 % sin que baje el margen total que deja | hasta **13 %** de sus litros | Inferido |
 
-**Lectura:** el descuento especial costó en 2025 más de lo que dejó el crecimiento que trajo: **569 contra 371 millones de CLP**. Corea del Sur sí es el mercado que más crece, pero la viña paga ese crecimiento.
+**Lectura:** el argumento principal es el tope de 8 %: recupera 286 millones de CLP al año y conviene mientras Corea del Sur no reduzca sus compras más de 13 %. Como referencia, el descuento extra (569 MM) supera el margen que dejaron los litros adicionales del segundo semestre (371 MM), pero esa comparación supone que sin descuento Corea no habría crecido.
 
 ---
 
@@ -33,7 +33,7 @@ Las cuatro visualizaciones salen de `run.py` y se guardan en `output/figuras/`. 
 
 **Corea del Sur es hoy el mercado que más crece y el que menos deja por litro. La causa es el descuento especial, no el producto ni el costo.**
 
-En 2025, Corea del Sur aumentó sus compras en 34 % entre el primer y el segundo semestre, mientras siete de los diez mercados de exportación bajaron. Sin embargo, cada litro vendido allí dejó **1.715 pesos de margen, contra 2.270 en el resto** (−24 %). Corea del Sur compra el mismo vino, en la misma mezcla de varietal, reserva y gran reserva, al mismo precio de lista y con el mismo costo de producción. La única diferencia es el descuento: **13,5 % contra 2,6 %**. Ese descuento, decidido por el directorio sin un análisis de margen, costó **569 millones de pesos en 2025**, más que los 371 millones de margen que dejó el volumen adicional que trajo.
+En 2025, Corea del Sur aumentó sus compras en 34 % entre el primer y el segundo semestre, mientras siete de los diez mercados de exportación bajaron. Sin embargo, cada litro vendido allí dejó **1.715 pesos de margen, contra 2.270 en el resto** (−24 %). Corea del Sur compra el mismo vino, en la misma mezcla de varietal, reserva y gran reserva, al mismo precio de lista y con el mismo costo de producción. La única diferencia es el descuento: **13,5 % contra 2,6 %**. Ese descuento, decidido por el directorio sin un análisis de margen, costó **569 millones de pesos en 2025**.
 
 Recomendamos:
 
