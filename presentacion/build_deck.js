@@ -220,7 +220,7 @@ PREGUNTAS PROBABLES:
   pres.addSection({ title: "Modelo" });
   s = pres.addSlide({ masterName: "CONTENIDO", sectionTitle: "Modelo" });
   s.addText("Modelo: una fila es una línea de venta", { placeholder: "title" });
-  s.addImage({ path: FIG_MODELO, x: 0.45, y: 1.35, w: 8.3, h: 8.3 * 1376 / 2080, objectName: "diagrama_modelo",
+  s.addImage({ path: FIG_MODELO, x: 0.45, y: 1.35, w: 8.3, h: 8.3 * 1500 / 2600, objectName: "diagrama_modelo",
     altText: "Esquema estrella: fact_venta_linea con dimensiones fecha (factura y embarque), embarque, moneda, producto, mercado y cliente" });
   const puntos = [
     ["Grano", "Un venta_id: un producto de una añada, vendido a un cliente de un mercado, en una factura (13.761 filas)."],

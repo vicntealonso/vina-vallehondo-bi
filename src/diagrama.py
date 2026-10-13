@@ -5,48 +5,105 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch
+from matplotlib.patches import FancyBboxPatch, PathPatch
+from matplotlib.path import Path
 
 from . import config
-from .figures import AZUL, GRIS, INK, INK_2
 
-LH = 0.026  # alto de línea (fracción de la figura)
-HEAD = 0.045
+# Paleta (coherente con los gráficos del informe)
+INK = "#1d1c1a"
+INK_2 = "#5f5d58"
+AZUL = "#2a78d6"
+AZUL_SUAVE = "#eaf2fc"
+GRIS_LINEA = "#c9c6bf"
+DIM_HEAD = "#f3f2ee"
+DIM_BORDE = "#d6d3cb"
+PK_COLOR = "#eb6834"
+FK_COLOR = "#2a78d6"
+
+W, H = 1300, 750  # unidades del lienzo (16:9 aprox.)
+LH = 27           # alto de fila
+HEAD = 46         # alto de encabezado
 
 
-def _caja(ax, x, y_top, w, titulo, lineas, color_head, filas=None):
-    """Dibuja una tabla y devuelve su rectángulo (x0, y0, x1, y1)."""
-    h = HEAD + LH * len(lineas) + 0.015
+def _sombra(ax, x, y, w, h):
+    ax.add_patch(FancyBboxPatch((x + 4, y - 5), w, h, boxstyle="round,pad=0,rounding_size=12",
+                                fc="#000000", ec="none", alpha=0.07, zorder=1))
+
+
+def _badge(ax, x, y, texto, color):
+    ax.add_patch(FancyBboxPatch((x, y - 9), 30, 18, boxstyle="round,pad=0,rounding_size=5",
+                                fc=color, ec="none", zorder=5))
+    ax.text(x + 15, y, texto, ha="center", va="center", fontsize=7.5, color="white", fontweight="bold", zorder=6)
+
+
+def _dim(ax, x, y_top, w, nombre, filas_n, campos):
+    """Tarjeta de dimensión. campos: lista de (tipo, texto) con tipo en {'PK','FK',''}."""
+    h = HEAD + LH * len(campos) + 14
     y0 = y_top - h
-    ax.add_patch(FancyBboxPatch((x, y0), w, h, boxstyle="round,pad=0,rounding_size=0.008",
-                                fc="white", ec=color_head, lw=1.4, zorder=2))
-    ax.add_patch(FancyBboxPatch((x, y_top - HEAD), w, HEAD, boxstyle="round,pad=0,rounding_size=0.008",
-                                fc=color_head, ec=color_head, lw=1.4, zorder=3))
-    sub = f"  ({filas:,} filas)".replace(",", ".") if filas is not None else ""
-    ax.text(x + 0.01, y_top - HEAD / 2, titulo + sub, va="center", ha="left", color="white",
-            fontsize=10, fontweight="bold", zorder=4)
-    for i, linea in enumerate(lineas):
-        negrita = linea.startswith("PK") or linea.startswith("FK")
-        ax.text(x + 0.01, y_top - HEAD - 0.008 - LH * (i + 0.5), linea, va="center", ha="left",
-                fontsize=8.2, color=INK if negrita else INK_2, zorder=4)
-    return (x, y0, x + w, y_top)
+    _sombra(ax, x, y0, w, h)
+    ax.add_patch(FancyBboxPatch((x, y0), w, h, boxstyle="round,pad=0,rounding_size=12",
+                                fc="white", ec=DIM_BORDE, lw=1.2, zorder=2))
+    ax.add_patch(FancyBboxPatch((x, y_top - HEAD), w, HEAD, boxstyle="round,pad=0,rounding_size=12",
+                                fc=DIM_HEAD, ec="none", zorder=3))
+    ax.add_patch(plt.Rectangle((x, y_top - HEAD), w, 14, fc=DIM_HEAD, ec="none", zorder=3))
+    ax.plot([x, x + w], [y_top - HEAD, y_top - HEAD], color=DIM_BORDE, lw=1, zorder=4)
+    ax.text(x + 16, y_top - HEAD / 2, nombre, ha="left", va="center", fontsize=12, fontweight="bold", color=INK, zorder=5)
+    ax.text(x + w - 14, y_top - HEAD / 2, f"{filas_n:,} filas".replace(",", "."), ha="right", va="center",
+            fontsize=9, color=INK_2, zorder=5)
+    for i, (tipo, texto) in enumerate(campos):
+        yy = y_top - HEAD - 8 - LH * (i + 0.5)
+        tx = x + 16
+        if tipo:
+            _badge(ax, tx, yy, tipo, PK_COLOR if tipo == "PK" else FK_COLOR)
+            tx += 38
+        ax.text(tx, yy, texto, ha="left", va="center", fontsize=10, color=INK if tipo else INK_2, zorder=5)
+    return dict(x0=x, x1=x + w, y0=y0, y1=y_top)
 
 
-def _une(ax, a, b, etiqueta=None, lado_a="izq", dy=0.0, dy_b=0.0):
-    """Línea de la tabla de hechos (a) a una dimensión (b)."""
-    ya = (a[1] + a[3]) / 2 + dy
-    xa = a[0] if lado_a == "izq" else a[2]
-    xb = b[2] if lado_a == "izq" else b[0]
-    yb = (b[1] + b[3]) / 2 + dy_b
-    ax.annotate("", xy=(xb, yb), xytext=(xa, ya),
-                arrowprops=dict(arrowstyle="-", color=INK_2, lw=1.1, connectionstyle="arc3,rad=0"), zorder=1)
-    ax.text(xa - 0.004 if lado_a == "izq" else xa + 0.004, ya + 0.008, "N", fontsize=7.5, color=INK_2,
-            ha="right" if lado_a == "izq" else "left")
-    ax.text(xb + 0.004 if lado_a == "izq" else xb - 0.004, yb + 0.008, "1", fontsize=7.5, color=INK_2,
-            ha="left" if lado_a == "izq" else "right")
+def _fact(ax, x, y_top, w, filas_n, bloques):
+    """Tabla de hechos con bloques (titulo, [(tipo, texto)])."""
+    n = sum(len(c) for _, c in bloques)
+    h = HEAD + LH * n + 30 * len(bloques) + 10
+    y0 = y_top - h
+    _sombra(ax, x, y0, w, h)
+    ax.add_patch(FancyBboxPatch((x, y0), w, h, boxstyle="round,pad=0,rounding_size=12",
+                                fc="white", ec=AZUL, lw=1.8, zorder=2))
+    ax.add_patch(FancyBboxPatch((x, y_top - HEAD), w, HEAD, boxstyle="round,pad=0,rounding_size=12",
+                                fc=AZUL, ec="none", zorder=3))
+    ax.add_patch(plt.Rectangle((x, y_top - HEAD), w, 14, fc=AZUL, ec="none", zorder=3))
+    ax.text(x + 16, y_top - HEAD / 2, "fact_venta_linea", ha="left", va="center", fontsize=13.5,
+            fontweight="bold", color="white", zorder=5)
+    ax.text(x + w - 14, y_top - HEAD / 2, f"{filas_n:,} filas".replace(",", "."), ha="right", va="center",
+            fontsize=9.5, color="white", zorder=5)
+    y = y_top - HEAD - 6
+    for titulo, campos in bloques:
+        ax.add_patch(plt.Rectangle((x + 1.5, y - 24), w - 3, 22, fc=AZUL_SUAVE, ec="none", zorder=3))
+        ax.text(x + 16, y - 13, titulo.upper(), ha="left", va="center", fontsize=8.5, fontweight="bold",
+                color=AZUL, zorder=5)
+        y -= 30
+        for tipo, texto in campos:
+            yy = y - LH / 2
+            tx = x + 16
+            if tipo:
+                _badge(ax, tx, yy, tipo, PK_COLOR if tipo == "PK" else FK_COLOR)
+                tx += 38
+            ax.text(tx, yy, texto, ha="left", va="center", fontsize=10, color=INK, zorder=5)
+            y -= LH
+    return dict(x0=x, x1=x + w, y0=y0, y1=y_top)
+
+
+def _conector(ax, xa, ya, xb, yb, etiqueta=None):
+    """Curva suave de la tabla de hechos (a, lado N) a la dimensión (b, lado 1)."""
+    xm = (xa + xb) / 2
+    curva = Path([(xa, ya), (xm, ya), (xm, yb), (xb, yb)], [Path.MOVETO, Path.CURVE4, Path.CURVE4, Path.CURVE4])
+    ax.add_patch(PathPatch(curva, fc="none", ec=GRIS_LINEA, lw=1.6, zorder=1))
+    for (x, y, t) in [(xa, ya, "N"), (xb, yb, "1")]:
+        ax.add_patch(plt.Circle((x, y), 9, fc="white", ec=GRIS_LINEA, lw=1.3, zorder=6))
+        ax.text(x, y, t, ha="center", va="center", fontsize=7.5, color=INK_2, fontweight="bold", zorder=7)
     if etiqueta:
-        ax.text((xa + xb) / 2, (ya + yb) / 2 + 0.014, etiqueta, fontsize=7.5, color=INK_2, ha="center",
-                style="italic", bbox=dict(fc="white", ec="none", pad=0.5))
+        ax.text(xm, (ya + yb) / 2 + 9, etiqueta, ha="center", va="bottom", fontsize=9, color=INK_2,
+                style="italic", zorder=7, bbox=dict(fc="white", ec="none", pad=1.5))
 
 
 def generar():
@@ -55,84 +112,60 @@ def generar():
          ["fact_venta_linea", "dim_fecha", "dim_mercado", "dim_producto", "dim_cliente", "dim_moneda", "dim_embarque"]}
     con.close()
 
-    fig = plt.figure(figsize=(13, 8.6))
+    plt.rcParams["font.family"] = ["Arial", "DejaVu Sans"]
+    fig = plt.figure(figsize=(13, 7.5))
     ax = fig.add_axes([0, 0, 1, 1])
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
+    ax.set_xlim(0, W)
+    ax.set_ylim(0, H)
     ax.axis("off")
 
-    fact = _caja(ax, 0.355, 0.86, 0.29, "fact_venta_linea", [
-        "PK venta_id (dimensión degenerada)",
-        "FK fecha_factura_key  → dim_fecha",
-        "FK fecha_embarque_key → dim_fecha",
-        "FK mercado_id, cliente_id, producto_id",
-        "FK moneda_id, embarque_key",
-        "anada (atributo: define el costo)",
-        "— Medidas —",
-        "cajas, litros, litros_volumen",
-        "precio_unitario, descuento",
-        "ingreso_usd, ingreso_bruto_clp_factura",
-        "descuento_clp_factura",
-        "ingreso_clp_factura | ingreso_clp_embarque",
-        "costo_clp",
-        "margen_clp_factura | margen_clp_embarque",
-        "dias_factura_a_embarque",
-        "— Calidad (para medir cobertura) —",
-        "incluida_margen, motivo_exclusion_margen",
-        "incluida_volumen, motivo_exclusion_volumen",
-        "es_descarte, fecha_imputada",
-    ], AZUL, n["fact_venta_linea"])
+    fact = _fact(ax, 455, 728, 390, n["fact_venta_linea"], [
+        ("Llaves", [("PK", "venta_id  (dimensión degenerada)"),
+                    ("FK", "fecha_factura_key · fecha_embarque_key"),
+                    ("FK", "mercado_id · cliente_id · producto_id"),
+                    ("FK", "moneda_id · embarque_key"),
+                    ("", "anada  (define el costo de la línea)")]),
+        ("Medidas", [("", "cajas · litros"),
+                     ("", "ingreso_usd · descuento_clp"),
+                     ("", "ingreso_clp  (factura | embarque)"),
+                     ("", "costo_clp"),
+                     ("", "margen_clp  (factura | embarque)")]),
+        ("Calidad y cobertura", [("", "incluida_margen · incluida_volumen"),
+                                 ("", "motivo_exclusion_*"),
+                                 ("", "es_descarte · fecha_imputada")]),
+    ])
 
-    gris = "#7d7b74"
-    fecha = _caja(ax, 0.03, 0.86, 0.23, "dim_fecha", [
-        "PK fecha_key (AAAAMMDD)",
-        "fecha, anio, mes",
-        "trimestre, semestre",
-        "dolar_observado (mindicador.cl)",
-    ], gris, n["dim_fecha"])
-    embarque = _caja(ax, 0.03, 0.56, 0.23, "dim_embarque", [
-        "PK embarque_key (llave sustituta)",
-        "embarque_id (viene repetido)",
-        "fecha_embarque, incoterm",
-        "puerto_destino, mercado_id_embarque",
-    ], gris, n["dim_embarque"])
-    moneda = _caja(ax, 0.03, 0.27, 0.23, "dim_moneda", [
-        "PK moneda_id",
-        "moneda (CLP, USD)",
-    ], gris, n["dim_moneda"])
-    producto = _caja(ax, 0.74, 0.86, 0.23, "dim_producto", [
-        "PK producto_id",
-        "producto, cepa, tipo_vino",
-        "tier (Varietal/Reserva/Gran Reserva)",
-        "formato, litros_por_caja",
-    ], gris, n["dim_producto"])
-    mercado = _caja(ax, 0.74, 0.58, 0.23, "dim_mercado", [
-        "PK mercado_id",
-        "pais, zona, canal",
-    ], gris, n["dim_mercado"])
-    cliente = _caja(ax, 0.74, 0.36, 0.23, "dim_cliente", [
-        "PK cliente_id",
-        "nombre, tipo, mercado_id",
-    ], gris, n["dim_cliente"])
+    wd = 300
+    fecha = _dim(ax, 40, 728, wd, "dim_fecha", n["dim_fecha"], [
+        ("PK", "fecha_key"), ("", "fecha · mes · trimestre · semestre"), ("", "dolar_observado  (mindicador.cl)")])
+    embarque = _dim(ax, 40, 488, wd, "dim_embarque", n["dim_embarque"], [
+        ("PK", "embarque_key  (llave sustituta)"), ("", "embarque_id · fecha_embarque"), ("", "incoterm · puerto_destino")])
+    moneda = _dim(ax, 40, 230, wd, "dim_moneda", n["dim_moneda"], [("PK", "moneda_id"), ("", "moneda  (CLP · USD)")])
+    producto = _dim(ax, 960, 728, wd, "dim_producto", n["dim_producto"], [
+        ("PK", "producto_id"), ("", "producto · cepa · tipo_vino"), ("", "tier  (Varietal · Reserva · G. Reserva)"),
+        ("", "formato · litros_por_caja")])
+    mercado = _dim(ax, 960, 470, wd, "dim_mercado", n["dim_mercado"], [("PK", "mercado_id"), ("", "pais · zona · canal")])
+    cliente = _dim(ax, 960, 270, wd, "dim_cliente", n["dim_cliente"], [("PK", "cliente_id"), ("", "nombre · tipo · mercado_id")])
 
-    _une(ax, fact, fecha, "rol: fecha de factura", "izq", dy=0.20, dy_b=0.05)
-    _une(ax, fact, fecha, "rol: fecha de embarque", "izq", dy=0.10, dy_b=-0.05)
-    _une(ax, fact, embarque, None, "izq", dy=-0.02)
-    _une(ax, fact, moneda, None, "izq", dy=-0.15)
-    _une(ax, fact, producto, None, "der", dy=0.17)
-    _une(ax, fact, mercado, None, "der", dy=0.02)
-    _une(ax, fact, cliente, None, "der", dy=-0.12)
+    mid = lambda d: (d["y0"] + d["y1"]) / 2
+    _conector(ax, fact["x0"], fact["y1"] - 120, fecha["x1"], mid(fecha) + 22)
+    _conector(ax, fact["x0"], fact["y1"] - 150, fecha["x1"], mid(fecha) - 22)
+    ax.text((fact["x0"] + fecha["x1"]) / 2, fecha["y1"] - 4, "2 roles:\nfactura y embarque", ha="center", va="top",
+            fontsize=9, color=INK_2, style="italic", linespacing=1.3, zorder=7)
+    _conector(ax, fact["x0"], mid(fact) + 10, embarque["x1"], mid(embarque))
+    _conector(ax, fact["x0"], fact["y0"] + 60, moneda["x1"], mid(moneda))
+    _conector(ax, fact["x1"], fact["y1"] - 120, producto["x0"], mid(producto))
+    _conector(ax, fact["x1"], mid(fact) - 10, mercado["x0"], mid(mercado))
+    _conector(ax, fact["x1"], fact["y0"] + 60, cliente["x0"], mid(cliente))
 
-    ax.text(0.03, 0.965, "Modelo dimensional — Viña Vallehondo (esquema estrella)", fontsize=14,
-            fontweight="bold", color=INK)
-    ax.text(0.03, 0.935, "Grano: una fila es una línea de venta (venta_id único): un producto de una añada, vendido a un "
-                         "cliente de un mercado en una factura, con su embarque si es exportación.",
-            fontsize=9.5, color=INK_2)
-    ax.text(0.03, 0.06, "Fuera del modelo: flete y seguro CIF/FCA, costo de distribución nacional, aranceles/TLC, "
-                        "fecha de cobro (60/90 días), vendedores. No hay datos para ellos o no aportan a la pregunta P3.",
-            fontsize=8.5, color=INK_2)
-    ax.text(0.03, 0.035, "Fuente: output/modelo_vallehondo.sqlite, construido por run.py desde las 4 fuentes del caso.",
-            fontsize=7.5, color=INK_2)
+    # Leyenda
+    _badge(ax, 960, 52, "PK", PK_COLOR)
+    ax.text(998, 52, "llave primaria", va="center", fontsize=9, color=INK_2)
+    _badge(ax, 1100, 52, "FK", FK_COLOR)
+    ax.text(1138, 52, "llave foránea", va="center", fontsize=9, color=INK_2)
+    ax.text(40, 52, "Esquema estrella · N:1 de la tabla de hechos a cada dimensión · añada como atributo del hecho",
+            va="center", fontsize=9, color=INK_2)
+
     config.FIGS.mkdir(parents=True, exist_ok=True)
-    fig.savefig(config.FIGS / "fig0_modelo_dimensional.png", dpi=160)
+    fig.savefig(config.FIGS / "fig0_modelo_dimensional.png", dpi=200, facecolor="white")
     plt.close(fig)
