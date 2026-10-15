@@ -15,28 +15,28 @@ Mercado que creció dejando poco margen: **Corea del Sur**
 |---|---|---|---|---|---|---|---|
 | Corea del Sur | 641.142,0 | 857.709,0 | 33,8 | 1.714,7 | 42,0 | 13,5 | Creció dejando poco margen |
 | México | 528.876,0 | 567.342,0 | 7,3 | 2.326,7 | 49,1 | 2,6 | Creció con buen margen |
-| Brasil | 532.926,0 | 567.855,0 | 6,6 | 2.234,5 | 48,6 | 2,6 | Creció con buen margen |
+| Brasil | 532.926,0 | 567.855,0 | 6,6 | 2.234,4 | 48,6 | 2,6 | Creció con buen margen |
 | Reino Unido | 565.371,0 | 539.577,0 | -4,6 | 2.247,0 | 48,8 | 2,4 | No creció |
 | Alemania | 536.382,0 | 509.256,0 | -5,1 | 2.306,6 | 49,0 | 2,3 | No creció |
 | Japón | 534.888,0 | 496.611,0 | -7,2 | 2.304,5 | 49,2 | 2,5 | No creció |
-| China | 575.424,0 | 518.022,0 | -10,0 | 2.216,9 | 48,3 | 2,6 | No creció |
+| China | 575.424,0 | 518.022,0 | -10,0 | 2.216,8 | 48,3 | 2,6 | No creció |
 | Estados Unidos | 581.886,0 | 502.425,0 | -13,7 | 2.278,3 | 48,9 | 2,8 | No creció |
-| Países Bajos | 587.898,0 | 491.472,0 | -16,4 | 2.240,1 | 48,8 | 2,6 | No creció |
-| Canadá | 621.495,0 | 487.179,0 | -21,6 | 2.274,0 | 48,7 | 2,6 | No creció |
+| Países Bajos | 587.898,0 | 491.472,0 | -16,4 | 2.240,0 | 48,8 | 2,6 | No creció |
+| Canadá | 621.495,0 | 487.179,0 | -21,6 | 2.273,9 | 48,7 | 2,6 | No creció |
 
 ## Sensibilidad a la definición
 
 | pais | margen_L_factura | margen_L_embarque | dif_margen_L | dif_margen_L_pct | rank_factura | rank_embarque | clasif_factura | clasif_embarque | crec_S2_vs_S1_pct | crec_T4_vs_T1_pct | clasif_T4_vs_T1 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Alemania | 2.306,6 | 2.249,9 | -56,7 | -2,5 | 2 | 3 | No creció | No creció | -5,1 | -17,9 | No creció |
-| Brasil | 2.234,5 | 2.178,2 | -56,3 | -2,5 | 8 | 8 | Creció con buen margen | Creció con buen margen | 6,6 | -3,8 | No creció |
-| Canadá | 2.274,0 | 2.229,5 | -44,5 | -2,0 | 5 | 5 | No creció | No creció | -21,6 | -29,6 | No creció |
-| China | 2.216,9 | 2.170,3 | -46,6 | -2,1 | 9 | 9 | No creció | No creció | -10,0 | -11,9 | No creció |
+| Brasil | 2.234,4 | 2.178,2 | -56,2 | -2,5 | 8 | 8 | Creció con buen margen | Creció con buen margen | 6,6 | -3,8 | No creció |
+| Canadá | 2.273,9 | 2.229,5 | -44,5 | -2,0 | 5 | 5 | No creció | No creció | -21,6 | -29,6 | No creció |
+| China | 2.216,8 | 2.170,3 | -46,6 | -2,1 | 9 | 9 | No creció | No creció | -10,0 | -11,9 | No creció |
 | Corea del Sur | 1.714,7 | 1.679,4 | -35,3 | -2,1 | 10 | 10 | Creció dejando poco margen | Creció dejando poco margen | 33,8 | 58,1 | Creció dejando poco margen |
 | Estados Unidos | 2.278,3 | 2.237,1 | -41,2 | -1,8 | 4 | 4 | No creció | No creció | -13,7 | -23,0 | No creció |
 | Japón | 2.304,5 | 2.258,2 | -46,2 | -2,0 | 3 | 2 | No creció | No creció | -7,2 | -8,1 | No creció |
 | México | 2.326,7 | 2.296,0 | -30,8 | -1,3 | 1 | 1 | Creció con buen margen | Creció con buen margen | 7,3 | 3,3 | Creció con buen margen |
-| Países Bajos | 2.240,1 | 2.208,4 | -31,6 | -1,4 | 7 | 6 | No creció | No creció | -16,4 | -16,5 | No creció |
+| Países Bajos | 2.240,0 | 2.208,4 | -31,6 | -1,4 | 7 | 6 | No creció | No creció | -16,4 | -16,5 | No creció |
 | Reino Unido | 2.247,0 | 2.202,7 | -44,3 | -2,0 | 6 | 7 | No creció | No creció | -4,6 | -9,4 | No creció |
 
 ## Robustez: sensibilidad solo con embarques confiables
@@ -45,13 +45,13 @@ Líneas de exportación cuyo embarque coincide en mercado con la venta y es post
 
 | pais | margen_L_factura | margen_L_embarque | dif_margen_L_pct | rank_factura | rank_embarque | clasif_factura | clasif_embarque |
 |---|---|---|---|---|---|---|---|
-| Alemania | 2.370,2 | 2.290,3 | -3,4 | 1 | 1 | No creció | No creció |
+| Alemania | 2.370,1 | 2.290,3 | -3,4 | 1 | 1 | No creció | No creció |
 | Brasil | 2.245,2 | 2.175,6 | -3,1 | 6 | 7 | Creció con buen margen | Creció con buen margen |
 | Canadá | 2.235,3 | 2.204,9 | -1,4 | 7 | 6 | No creció | No creció |
 | China | 2.196,5 | 2.147,7 | -2,2 | 8 | 8 | No creció | No creció |
 | Corea del Sur | 1.740,0 | 1.679,8 | -3,5 | 10 | 10 | Creció dejando poco margen | Creció dejando poco margen |
-| Estados Unidos | 2.191,3 | 2.136,2 | -2,5 | 9 | 9 | No creció | No creció |
-| Japón | 2.319,8 | 2.281,5 | -1,6 | 2 | 2 | No creció | No creció |
+| Estados Unidos | 2.191,2 | 2.136,2 | -2,5 | 9 | 9 | No creció | No creció |
+| Japón | 2.319,7 | 2.281,5 | -1,6 | 2 | 2 | No creció | No creció |
 | México | 2.295,3 | 2.242,2 | -2,3 | 4 | 4 | Creció con buen margen | Creció con buen margen |
 | Países Bajos | 2.257,7 | 2.220,7 | -1,6 | 5 | 5 | No creció | No creció |
 | Reino Unido | 2.315,8 | 2.252,8 | -2,7 | 3 | 3 | No creció | No creció |

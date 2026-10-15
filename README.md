@@ -99,7 +99,7 @@ Todos se documentan en el código y en la bitácora del informe.
 - **Costo:** se usa el de la añada de la línea. Si falta, la línea sale del margen. No se toma el costo de otra añada.
 - **Descartes (cajas negativas):** restan ingreso y litros. El costo no se reversa.
 - **Corea del Sur** tiene zona_id 8, que no existe en la tabla de zonas. Se asigna a Asia.
-- **Dólar en fines de semana y feriados:** se usa el último día hábil anterior disponible en el caché versionado. El caché fija el 31-dic-2024 en 993,85 CLP/USD, por lo que las facturas del 1-ene-2025 usan ese valor de forma reproducible.
+- **Dólar en fines de semana y feriados:** se usa el último día hábil anterior disponible en el caché versionado. Las facturas del 1-ene-2025 (feriado) usan el dólar observado del 30-dic-2024, último día hábil bancario: 992,12 CLP/USD. Ese valor se tomó del SII (sii.cl/valores_y_fechas/dolar/dolar2024.htm) porque la API de mindicador no respondía; el 31-dic-2024 es feriado bancario y no tiene valor publicado. El SII coincide con mindicador en las fechas verificadas (2-ene-2025: 996,46).
 - **Embarques huérfanos:** las líneas de embarque cuyo `venta_id` no existe en el ERP no entran al modelo, pero se cuentan y listan en `info_calidad.json`.
 
 ## Informe
