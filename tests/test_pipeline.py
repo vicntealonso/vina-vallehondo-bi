@@ -1,9 +1,37 @@
 import sqlite3
+import subprocess
+import sys
 import unittest
+from pathlib import Path
 
 import pandas as pd
 
 from src import config, metrics, transform
+
+
+class EndToEndTests(unittest.TestCase):
+    def test_pipeline_offline_regenera_resultados(self):
+        root = Path(__file__).resolve().parents[1]
+        subprocess.run(
+            [sys.executable, "run.py", "--offline"],
+            cwd=root,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        with sqlite3.connect(config.MODELO_PATH) as con:
+            fact = pd.read_sql(
+                "SELECT COUNT(*) AS filas, COUNT(DISTINCT venta_id) AS venta_ids "
+                "FROM fact_venta_linea",
+                con,
+            ).iloc[0]
+        tabla = pd.read_csv(config.OUT / "tabla_mercados.csv", index_col="pais")
+        escenario = pd.read_csv(config.OUT / "escenario_tope_descuento.csv").iloc[0]
+        self.assertEqual((fact["filas"], fact["venta_ids"]), (13761, 13761))
+        self.assertAlmostEqual(tabla.loc["Corea del Sur", "crecimiento_litros_pct"], 33.78, delta=0.02)
+        self.assertAlmostEqual(tabla.loc["Corea del Sur", "margen_clp_por_litro"], 1714.7, delta=0.2)
+        self.assertAlmostEqual(escenario["recuperable_clp"] / 1e6, 286, delta=1)
 
 
 class ParserTests(unittest.TestCase):
@@ -75,6 +103,13 @@ class ModelInvariantTests(unittest.TestCase):
         self.assertAlmostEqual(row["tope_descuento_pct"], 8.0)
         self.assertAlmostEqual(row["recuperable_clp"] / 1e6, 286, delta=1)
         self.assertAlmostEqual(row["caida_volumen_equilibrio_pct"], 13.17, delta=0.02)
+
+    def test_sensibilidad_no_cambia_el_universo_de_crecimiento(self):
+        sensibilidad = metrics.sensibilidad(self.h)
+        self.assertAlmostEqual(
+            sensibilidad.loc["Corea del Sur", "crec_S2_vs_S1_pct"], 33.78, delta=0.02)
+        self.assertAlmostEqual(
+            sensibilidad.loc["México", "crec_S2_vs_S1_pct"], 7.27, delta=0.02)
 
 
 if __name__ == "__main__":

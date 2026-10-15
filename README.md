@@ -6,7 +6,9 @@ Este repositorio contiene la cadena completa: lee las cuatro fuentes, las limpia
 
 ## Cómo instalar
 
-Requiere Python 3.10 o superior.
+Entorno validado: Python 3.10. El proyecto tuvo inestabilidad con las versiones
+originalmente fijadas al ejecutarse bajo Python 3.13, por lo que Python 3.10 es
+la referencia para reproducir los resultados.
 
 ```bash
 python3 -m venv .venv
