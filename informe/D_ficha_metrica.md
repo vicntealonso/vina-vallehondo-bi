@@ -79,10 +79,10 @@ No hay un extracto del año anterior. El correo dice: "no hay un extracto del a�
 |---|---|---|---|---|---|---|
 | **Corea del Sur** | **+33,8 %** | **1.715** | **1.679** | −35 (−2,1 %) | 42,0 → 41,5 | **Creció dejando poco margen** |
 | México | +7,3 % | 2.327 | 2.296 | −31 (−1,3 %) | 49,1 → 48,8 | Creció con buen margen |
-| Brasil | +6,6 % | 2.235 | 2.178 | −56 (−2,5 %) | 48,6 → 47,9 | Creció con buen margen |
+| Brasil | +6,6 % | 2.234 | 2.178 | −56 (−2,5 %) | 48,6 → 47,9 | Creció con buen margen |
 | Reino Unido | −4,6 % | 2.247 | 2.203 | −44 (−2,0 %) | 48,8 → 48,3 | No creció |
 | Alemania | −5,1 % | 2.307 | 2.250 | −57 (−2,5 %) | 49,0 → 48,4 | No creció |
-| Japón | −7,2 % | 2.305 | 2.258 | −46 (−2,0 %) | 49,2 → 48,7 | No creció |
+| Japón | −7,2 % | 2.304 | 2.258 | −46 (−2,0 %) | 49,2 → 48,7 | No creció |
 | China | −10,0 % | 2.217 | 2.170 | −47 (−2,1 %) | 48,3 → 47,8 | No creció |
 | Estados Unidos | −13,7 % | 2.278 | 2.237 | −41 (−1,8 %) | 48,9 → 48,5 | No creció |
 | Países Bajos | −16,4 % | 2.240 | 2.208 | −32 (−1,4 %) | 48,8 → 48,4 | No creció |

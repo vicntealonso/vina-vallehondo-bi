@@ -80,12 +80,17 @@ def tabla_mercados(
     return out.sort_values("crecimiento_litros_pct", ascending=False)
 
 
-def sensibilidad(h: pd.DataFrame) -> pd.DataFrame:
-    """Resultado bajo la definición elegida y las alternativas, con la diferencia."""
-    confiable = h[h["embarque_confiable_sensibilidad"] == 1].copy()
-    a = tabla_mercados(confiable, "factura", "semestre", h_volumen=h)
-    b = tabla_mercados(confiable, "embarque", "semestre", h_volumen=h)
-    c = tabla_mercados(confiable, "factura", "trimestre", h_volumen=h)
+def sensibilidad(h: pd.DataFrame, solo_confiable: bool = False) -> pd.DataFrame:
+    """Resultado bajo la definición elegida y las alternativas, con la diferencia.
+
+    Principal (solo_confiable=False): todas las líneas del universo de margen; es la que reporta el informe.
+    Robustez (solo_confiable=True): solo líneas cuyo embarque coincide en mercado y es posterior a la factura,
+    para comparar factura vs embarque sin vínculos dudosos. El crecimiento siempre usa todo el volumen válido.
+    """
+    margen = h[h["embarque_confiable_sensibilidad"] == 1].copy() if solo_confiable else h
+    a = tabla_mercados(margen, "factura", "semestre", h_volumen=h)
+    b = tabla_mercados(margen, "embarque", "semestre", h_volumen=h)
+    c = tabla_mercados(margen, "factura", "trimestre", h_volumen=h)
     s = pd.DataFrame({
         "margen_L_factura": a["margen_clp_por_litro"],
         "margen_L_embarque": b["margen_clp_por_litro"],

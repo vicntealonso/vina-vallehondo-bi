@@ -56,6 +56,7 @@ def main():
     assert sin_tc.empty, f"{len(sin_tc)} líneas del margen quedaron sin conversión a pesos"
     t = metrics.tabla_mercados(h, "factura", "semestre")
     s = metrics.sensibilidad(h)
+    s_conf = metrics.sensibilidad(h, solo_confiable=True)
     poco = t[t["clasificacion"] == "Creció dejando poco margen"]
     critico = poco.index[0] if len(poco) else t["margen_clp_por_litro"].idxmin()
     caso = metrics.caso_negocio(h, t, critico)
@@ -64,6 +65,7 @@ def main():
 
     t.to_csv(config.OUT / "tabla_mercados.csv", encoding="utf-8-sig")
     s.to_csv(config.OUT / "sensibilidad_definiciones.csv", encoding="utf-8-sig")
+    s_conf.to_csv(config.OUT / "sensibilidad_embarque_confiable.csv", encoding="utf-8-sig")
     cob.to_csv(config.OUT / "cobertura.csv", index=False, encoding="utf-8-sig")
     caso["por_tier"].to_csv(config.OUT / "precio_costo_por_tier.csv", index=False, encoding="utf-8-sig")
     caso["mix_tier_pct"].to_csv(config.OUT / "mix_tier.csv", index=False, encoding="utf-8-sig")
@@ -122,6 +124,16 @@ def main():
         md(s[["margen_L_factura", "margen_L_embarque", "dif_margen_L", "dif_margen_L_pct", "rank_factura", "rank_embarque",
            "clasif_factura", "clasif_embarque", "crec_S2_vs_S1_pct", "crec_T4_vs_T1_pct", "clasif_T4_vs_T1"]]
         .round(1)),
+        "",
+        "## Robustez: sensibilidad solo con embarques confiables",
+        "",
+        f"Líneas de exportación cuyo embarque coincide en mercado con la venta y es posterior a la factura: "
+        f"{fmt(calidad['lineas_sensibilidad_confiable'])}. "
+        f"Clasificaciones que cambian entre factura y embarque: "
+        f"{int((s_conf['clasif_factura'] != s_conf['clasif_embarque']).sum())}.",
+        "",
+        md(s_conf[["margen_L_factura", "margen_L_embarque", "dif_margen_L_pct", "rank_factura", "rank_embarque",
+                   "clasif_factura", "clasif_embarque"]].round(1)),
         "",
         f"Mediana días factura→embarque: {fmt(calidad['dias_factura_a_embarque_mediana'])}; "
         f"embarques con fecha anterior a la factura: {fmt(calidad['pct_embarque_antes_de_factura'], 1)} %",

@@ -111,6 +111,19 @@ class ModelInvariantTests(unittest.TestCase):
         self.assertAlmostEqual(
             sensibilidad.loc["México", "crec_S2_vs_S1_pct"], 7.27, delta=0.02)
 
+    def test_sensibilidad_principal_coincide_con_el_informe(self):
+        # La tabla de la sección D usa todas las líneas del universo de margen.
+        s = metrics.sensibilidad(self.h)
+        self.assertAlmostEqual(s.loc["Corea del Sur", "margen_L_factura"], 1714.7, delta=0.2)
+        self.assertAlmostEqual(s.loc["Corea del Sur", "margen_L_embarque"], 1679.4, delta=0.2)
+        self.assertTrue((s["clasif_factura"] == s["clasif_embarque"]).all())
+
+    def test_robustez_embarques_confiables_no_cambia_clasificaciones(self):
+        s = metrics.sensibilidad(self.h, solo_confiable=True)
+        self.assertTrue((s["clasif_factura"] == s["clasif_embarque"]).all())
+        self.assertEqual(s["margen_L_factura"].idxmin(), "Corea del Sur")
+        self.assertEqual(s["margen_L_embarque"].idxmin(), "Corea del Sur")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -39,6 +39,9 @@
   .acta { font-size: 8.6pt; }
   .acta table td { border: 1px solid var(--line); }
   .acta p { margin: 0 0 1mm; }
+  .acta p:empty, .acta p:has(> br:only-child) { display: none; }
+  .annex { page-break-after: avoid; }
+  .annex > :last-child { margin-bottom: 0; }
   .nb { break-inside: avoid; }
 </style>
 </head>
@@ -124,10 +127,10 @@ Cada línea queda con su motivo de exclusión, para medir la calidad en vez de f
   <tr><th>Mercado</th><th class="n">Crec. litros<br>S2/S1</th><th class="n">Crec.<br>T4/T1</th><th class="n">CLP/L<br>factura</th><th class="n">CLP/L<br>embarque</th><th class="n">Dif.</th><th class="n">Margen %<br>fact. → emb.</th><th>Clasificación</th></tr>
   <tr class="hl"><td>Corea del Sur</td><td class="n">+33,8&nbsp;%</td><td class="n">+58,1&nbsp;%</td><td class="n">1.715</td><td class="n">1.679</td><td class="n">−2,1&nbsp;%</td><td class="n">42,0 → 41,5</td><td class="cl">Creció dejando poco margen</td></tr>
   <tr><td>México</td><td class="n">+7,3&nbsp;%</td><td class="n">+3,3&nbsp;%</td><td class="n">2.327</td><td class="n">2.296</td><td class="n">−1,3&nbsp;%</td><td class="n">49,1 → 48,8</td><td class="cl">Creció con buen margen</td></tr>
-  <tr><td>Brasil</td><td class="n">+6,6&nbsp;%</td><td class="n">−3,8&nbsp;%</td><td class="n">2.235</td><td class="n">2.178</td><td class="n">−2,5&nbsp;%</td><td class="n">48,6 → 47,9</td><td class="cl">Creció con buen margen*</td></tr>
+  <tr><td>Brasil</td><td class="n">+6,6&nbsp;%</td><td class="n">−3,8&nbsp;%</td><td class="n">2.234</td><td class="n">2.178</td><td class="n">−2,5&nbsp;%</td><td class="n">48,6 → 47,9</td><td class="cl">Creció con buen margen*</td></tr>
   <tr><td>Reino Unido</td><td class="n">−4,6&nbsp;%</td><td class="n">−9,4&nbsp;%</td><td class="n">2.247</td><td class="n">2.203</td><td class="n">−2,0&nbsp;%</td><td class="n">48,8 → 48,3</td><td class="cl">No creció</td></tr>
   <tr><td>Alemania</td><td class="n">−5,1&nbsp;%</td><td class="n">−17,9&nbsp;%</td><td class="n">2.307</td><td class="n">2.250</td><td class="n">−2,5&nbsp;%</td><td class="n">49,0 → 48,4</td><td class="cl">No creció</td></tr>
-  <tr><td>Japón</td><td class="n">−7,2&nbsp;%</td><td class="n">−8,1&nbsp;%</td><td class="n">2.305</td><td class="n">2.258</td><td class="n">−2,0&nbsp;%</td><td class="n">49,2 → 48,7</td><td class="cl">No creció</td></tr>
+  <tr><td>Japón</td><td class="n">−7,2&nbsp;%</td><td class="n">−8,1&nbsp;%</td><td class="n">2.304</td><td class="n">2.258</td><td class="n">−2,0&nbsp;%</td><td class="n">49,2 → 48,7</td><td class="cl">No creció</td></tr>
   <tr><td>China</td><td class="n">−10,0&nbsp;%</td><td class="n">−11,9&nbsp;%</td><td class="n">2.217</td><td class="n">2.170</td><td class="n">−2,1&nbsp;%</td><td class="n">48,3 → 47,8</td><td class="cl">No creció</td></tr>
   <tr><td>Estados Unidos</td><td class="n">−13,7&nbsp;%</td><td class="n">−23,0&nbsp;%</td><td class="n">2.278</td><td class="n">2.237</td><td class="n">−1,8&nbsp;%</td><td class="n">48,9 → 48,5</td><td class="cl">No creció</td></tr>
   <tr><td>Países Bajos</td><td class="n">−16,4&nbsp;%</td><td class="n">−16,5&nbsp;%</td><td class="n">2.240</td><td class="n">2.208</td><td class="n">−1,4&nbsp;%</td><td class="n">48,8 → 48,4</td><td class="cl">No creció</td></tr>
@@ -136,22 +139,21 @@ Cada línea queda con su motivo de exclusión, para medir la calidad en vez de f
 </table>
 <p class="muted" style="margin-top:-1mm">* Con crecimiento T4 vs T1, Brasil pasa a “No creció”. Fuente: <code>output/sensibilidad_definiciones.csv</code>.</p>
 
-<div class="duo nb">
-  <figure><img src="../output/figuras/fig2_margen_factura_vs_embarque.png" alt="Margen por definición"></figure>
-  <div style="flex:1; padding-top:2mm">
+<figure class="nb"><img src="../output/figuras/fig2_margen_factura_vs_embarque.png" alt="Margen por definición" style="width:82%"></figure>
+<div>
+  <div>
     <p><b>Cuánto cambia.</b> Con la fecha de embarque, el margen de exportación baja de 18.869 a 18.499 MM CLP (<b>−370 MM, −2,0&nbsp;%</b>). El peso se apreció en 2025 (dólar de ~$996 en enero a ~$911 en diciembre) y el embarque llega en promedio 29 días después de la factura: el tipo de cambio efectivo baja de 951 a 942 CLP/USD.</p>
     <p><b>Pero la alternativa no cambia la respuesta, y eso es un hallazgo.</b> Ningún mercado cambia de clasificación, el ranking solo intercambia dos pares de vecinos, y la brecha de Corea del Sur con el resto es casi idéntica: <b>555 CLP/L</b> con factura y <b>546 CLP/L</b> con embarque. El desfase, y por lo tanto el dólar, es parecido en todos los mercados: mueve el nivel, no las diferencias. Lo que separa a Corea del Sur no es el tipo de cambio.</p>
+    <p><b>Prueba de solidez.</b> Repetimos la comparación solo con las 2.648 líneas cuyo embarque coincide en mercado con la venta y ocurre después de la factura, para descartar que los vínculos dudosos de los embarques influyan. El margen con el dólar del embarque baja entre 1,4&nbsp;% y 3,5&nbsp;% según el mercado, ninguna clasificación cambia y Corea del Sur sigue última (<code>output/sensibilidad_embarque_confiable.csv</code>).</p>
     <p><b>Segunda definición, período de crecimiento.</b> Con T4 vs T1, Corea del Sur crece aún más (+58&nbsp;%) y México sigue creciendo; Brasil deja de crecer (su S2 supera al S1 por un T2 débil). La estacionalidad no explica a Corea del Sur: Japón (−7&nbsp;%) y China (−10&nbsp;%), en la misma región y estación, bajan.</p>
   </div>
 </div>
 
 <!-- ============================ E ============================ -->
 <h2>E. Evidencia, caso de negocio y recomendación</h2>
-<figure class="nb"><img src="../output/figuras/fig1_crecimiento_vs_margen.png" alt="Crecimiento vs margen" style="width:78%"></figure>
-<div class="duo nb">
-  <figure><img src="../output/figuras/fig4_litros_mensuales.png" alt="Litros mensuales"></figure>
-  <figure><img src="../output/figuras/fig3_precio_descuento_costo.png" alt="Precio, descuento, costo"></figure>
-</div>
+<figure class="nb"><img src="../output/figuras/fig1_crecimiento_vs_margen.png" alt="Crecimiento vs margen" style="width:88%"></figure>
+<figure class="nb"><img src="../output/figuras/fig4_litros_mensuales.png" alt="Litros mensuales" style="width:88%"></figure>
+<figure class="nb"><img src="../output/figuras/fig3_precio_descuento_costo.png" alt="Precio, descuento, costo" style="width:88%"></figure>
 <div class="nb">
   <div>
     <table>
@@ -198,7 +200,7 @@ Cada línea queda con su motivo de exclusión, para medir la calidad en vez de f
   <tr><td>12</td><td>Descartes restan ingreso y litros; el costo no se reversa</td><td>“El costo de catálogo no se reversa”</td><td>60 líneas de exportación; excluirlas: Corea 1.737, resto 2.284 (brecha igual)</td><td>Contraparte, correo</td></tr>
   <tr><td>13</td><td>Costo de la añada de la línea; si falta, fuera del margen</td><td>“No usen el costo de otra añada”</td><td>1.910 líneas (sobre todo añada 2021); pesan parecido en todos los mercados</td><td>Contraparte, correo</td></tr>
   <tr><td>14</td><td>9 L por caja en 12x750 y 6x1500</td><td>Dato de la empresa (correo)</td><td>—</td><td>Contraparte, correo</td></tr>
-  <tr><td>15</td><td>Feriados y fines de semana: dólar del día hábil anterior; 1-ene-2025 usa el del 2-ene</td><td>Convención del dólar observado; serie 2024 no disponible en la API</td><td>44 líneas; efecto en el margen anual &lt; 0,1&nbsp;%</td><td>Equipo V1, 12-10-2026</td></tr>
+  <tr><td>15</td><td>Feriados y fines de semana: dólar del día hábil anterior; 1-ene-2025 usa el del 31-dic-2024 (993,85 CLP/USD)</td><td>Convención del dólar observado; el valor del 31-dic-2024 queda guardado en el caché versionado</td><td>44 líneas; efecto en el margen anual &lt; 0,1&nbsp;%</td><td>Equipo V1, 12-10-2026; caché 2024: V. Rodríguez, 15-10-2026</td></tr>
   <tr><td>16</td><td>Corea del Sur (zona 8 inexistente) es Asia</td><td>Vendedor Export Asia; 93&nbsp;% de sus ventas dicen “Asia”</td><td>No afecta la métrica (es por país)</td><td>Equipo V1, 12-10-2026</td></tr>
   <tr><td>17</td><td>Mercado = el de la venta, no el del embarque</td><td>Cuadra 100&nbsp;% con el cliente; el del embarque difiere en ~63&nbsp;%</td><td>Redistribuiría ventas entre países sin respaldo</td><td>Equipo V1, 12-10-2026</td></tr>
   <tr><td>18</td><td>El crecimiento de Corea se debe al descuento especial</td><td>Verbalizado: “se ve reflejado en el crecimiento”</td><td>Si hubiera crecido igual sin descuento, el descuento sería aún más difícil de justificar</td><td>Contraparte, reunión</td></tr>
