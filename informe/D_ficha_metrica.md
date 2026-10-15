@@ -136,4 +136,4 @@ Motivos de exclusión del margen: 1.910 líneas sin costo para su añada (13,7 %
 
 Las líneas sin costo para su añada se reparten de forma pareja entre los mercados de exportación: en cada uno representan entre el 12,5 % y el 16,3 % de sus líneas (Corea del Sur: 15,0 %). Por eso no sesgan la comparación entre mercados.
 
-Hay 44 líneas con fecha 1-ene-2025, que es feriado. Para ellas se usa el dólar del 2-ene-2025, el primer valor de la serie 2025, porque la API no entregó la serie 2024 con el día hábil anterior. El efecto sobre el margen anual es despreciable.
+Hay líneas con fecha 1-ene-2025, que es feriado. El caché versionado fija el dólar del 31-dic-2024 en 993,85 CLP/USD; por eso se usa el último día hábil anterior y no se requiere respaldo de tipo de cambio. La ejecución online y offline produce las mismas salidas.

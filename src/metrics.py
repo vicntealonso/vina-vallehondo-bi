@@ -16,7 +16,7 @@ import pandas as pd
 from . import config
 
 SQL_BASE = """
-SELECT f.*, m.pais, m.canal, fd.semestre, fd.trimestre, fd.mes, p.tier, p.cepa
+SELECT f.*, m.pais, m.canal, fd.anio, fd.semestre, fd.trimestre, fd.mes, p.tier, p.cepa
 FROM fact_venta_linea f
 JOIN dim_mercado m  ON m.mercado_id = f.mercado_id
 JOIN dim_fecha fd   ON fd.fecha_key = f.fecha_factura_key
@@ -42,7 +42,8 @@ def tabla_mercados(h: pd.DataFrame, fecha: str = "factura", crecimiento: str = "
     exp = h[h["canal"] == "Exportación"]
     col, base, actual = _periodos(crecimiento)
 
-    vol = exp[exp["incluida_volumen"] == 1].pivot_table(index="pais", columns=col, values="litros_volumen", aggfunc="sum")
+    vol = exp[(exp["incluida_volumen"] == 1) & (exp["anio"] == 2025)].pivot_table(
+        index="pais", columns=col, values="litros_volumen", aggfunc="sum")
     out = pd.DataFrame({
         "litros_base": vol[base],
         "litros_actual": vol[actual],
@@ -74,9 +75,10 @@ def tabla_mercados(h: pd.DataFrame, fecha: str = "factura", crecimiento: str = "
 
 def sensibilidad(h: pd.DataFrame) -> pd.DataFrame:
     """Resultado bajo la definición elegida y las alternativas, con la diferencia."""
-    a = tabla_mercados(h, "factura", "semestre")
-    b = tabla_mercados(h, "embarque", "semestre")
-    c = tabla_mercados(h, "factura", "trimestre")
+    confiable = h[h["embarque_confiable_sensibilidad"] == 1].copy()
+    a = tabla_mercados(confiable, "factura", "semestre")
+    b = tabla_mercados(confiable, "embarque", "semestre")
+    c = tabla_mercados(confiable, "factura", "trimestre")
     s = pd.DataFrame({
         "margen_L_factura": a["margen_clp_por_litro"],
         "margen_L_embarque": b["margen_clp_por_litro"],
@@ -96,13 +98,15 @@ def sensibilidad(h: pd.DataFrame) -> pd.DataFrame:
 
 
 def caso_negocio(h: pd.DataFrame, t: pd.DataFrame, mercado: str) -> dict:
-    """Traduce el hallazgo a pesos para el mercado que creció dejando poco margen."""
+    """Traduce el hallazgo a pesos y simula un tope de descuento."""
     resto = t.drop(index=mercado)
     desc_resto = resto["descuento_clp"].sum() / resto["ingreso_bruto_clp"].sum()
     m = t.loc[mercado]
     exceso_descuento = m["descuento_clp"] - m["ingreso_bruto_clp"] * desc_resto
     margen_L_resto = resto["margen_clp"].sum() / resto["litros_margen"].sum()
     brecha_margen = (margen_L_resto - m["margen_clp_por_litro"]) * m["litros_margen"]
+    tope_descuento = config.TOPE_DESCUENTO_ESCENARIO
+    recuperable_tope = max(0.0, m["descuento_clp"] - m["ingreso_bruto_clp"] * tope_descuento)
 
     exp = h[(h["canal"] == "Exportación") & (h["incluida_margen"] == 1)].copy()
     exp["grupo"] = np.where(exp["pais"] == mercado, mercado, "Resto exportación")
@@ -118,17 +122,23 @@ def caso_negocio(h: pd.DataFrame, t: pd.DataFrame, mercado: str) -> dict:
 
     # Litros ganados en S2 y el margen que dejaron, contra lo que costó el descuento extra
     litros_extra = m["litros_actual"] - m["litros_base"]
+    margen_actual = m["margen_clp"]
+    margen_con_tope = margen_actual + recuperable_tope
+    perdida_volumen_equilibrio_pct = recuperable_tope / margen_con_tope * 100 if margen_con_tope else 0.0
     return {
         "mercado": mercado,
         "descuento_pct_mercado": m["descuento_pct"],
         "descuento_pct_resto": desc_resto * 100,
         "exceso_descuento_clp": exceso_descuento,
+        "tope_descuento": tope_descuento,
+        "recuperable_tope_clp": recuperable_tope,
+        "perdida_volumen_equilibrio_pct": perdida_volumen_equilibrio_pct,
         "margen_L_mercado": m["margen_clp_por_litro"],
         "margen_L_resto": margen_L_resto,
         "margen_pct_resto": resto["margen_clp"].sum() / resto["ingreso_clp"].sum() * 100,
         "brecha_margen_clp": brecha_margen,
-        "litros_extra_S2": litros_extra,
-        "margen_de_litros_extra_clp": litros_extra * m["margen_clp_por_litro"],
+        "litros_extra_S2_estimados": litros_extra,
+        "margen_estimado_litros_extra_clp": litros_extra * m["margen_clp_por_litro"],
         "por_tier": por_tier.reset_index(),
         "mix_tier_pct": mix.reset_index(),
     }
@@ -139,10 +149,10 @@ def cobertura(h: pd.DataFrame, filas_origen: int, filas_duplicadas: int) -> pd.D
     filas = [("Filas en origen (tabla ventas)", filas_origen),
              ("Duplicados eliminados (mismo venta_id)", filas_duplicadas),
              ("Líneas únicas", len(h))]
-    for motivo, n in h["motivo_exclusion_margen"].value_counts().items():
+    for motivo, n in h["motivo_principal_exclusion_margen"].value_counts().items():
         filas.append((f"Fuera del margen: {motivo}", n))
     filas.append(("Líneas dentro del margen (todos los mercados)", int(h["incluida_margen"].sum())))
-    for motivo, n in h["motivo_exclusion_volumen"].value_counts().items():
+    for motivo, n in h["motivo_principal_exclusion_volumen"].value_counts().items():
         filas.append((f"Fuera del volumen: {motivo}", n))
     filas.append(("Líneas dentro del volumen (todos los mercados)", int(h["incluida_volumen"].sum())))
     exp = h[h["canal"] == "Exportación"]
@@ -155,10 +165,15 @@ def cobertura(h: pd.DataFrame, filas_origen: int, filas_duplicadas: int) -> pd.D
 
 def calidad_extra(h: pd.DataFrame) -> dict:
     exp = h[(h["canal"] == "Exportación") & h["dias_factura_a_embarque"].notna()]
+    imputadas = h[h["fecha_imputada"] == 1]
     return {
         "dias_factura_a_embarque_mediana": float(exp["dias_factura_a_embarque"].median()),
         "pct_embarque_antes_de_factura": float((exp["dias_factura_a_embarque"] < 0).mean() * 100),
         "lineas_descarte": int(h["es_descarte"].sum()),
         "lineas_fecha_imputada": int(h["fecha_imputada"].sum()),
+        "pct_fecha_imputada": float(h["fecha_imputada"].mean() * 100),
+        "lineas_fecha_imputada_margen": int((imputadas["incluida_margen"] == 1).sum()),
+        "lineas_fecha_imputada_volumen": int((imputadas["incluida_volumen"] == 1).sum()),
         "lineas_dolar_respaldo": int(h["dolar_respaldo"].sum()),
+        "lineas_sensibilidad_confiable": int(h["embarque_confiable_sensibilidad"].sum()),
     }

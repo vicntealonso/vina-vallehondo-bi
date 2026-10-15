@@ -15,7 +15,25 @@
       "CIF": 1250,
       "FOB": 1213,
       "FCA": 589
-    }
+    },
+    "lineas_sin_venta": 15,
+    "venta_ids_sin_venta": [
+      999000,
+      999001,
+      999002,
+      999003,
+      999004,
+      999005,
+      999006,
+      999007,
+      999008,
+      999009,
+      999010,
+      999011,
+      999012,
+      999013,
+      999014
+    ]
   },
   "ventas": {
     "filas_ventas": 13898,
@@ -33,7 +51,11 @@
     "pct_embarque_antes_de_factura": 29.92286962178236,
     "lineas_descarte": 109,
     "lineas_fecha_imputada": 82,
-    "lineas_dolar_respaldo": 44
+    "pct_fecha_imputada": 0.5958869268221786,
+    "lineas_fecha_imputada_margen": 65,
+    "lineas_fecha_imputada_volumen": 80,
+    "lineas_dolar_respaldo": 0,
+    "lineas_sensibilidad_confiable": 2648
   },
-  "dolar": "2024: no disponible, 2025: caché local, 2026: caché local"
+  "dolar": "2024: caché local, 2025: caché local, 2026: caché local"
 }

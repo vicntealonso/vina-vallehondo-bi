@@ -21,23 +21,23 @@ Las cuatro visualizaciones salen de `run.py` y se guardan en `output/figuras/`. 
 |---|---|---|
 | Descuento que Corea del Sur recibió por sobre lo que reciben los demás mercados (13,5 % vs 2,6 %) | **569 millones de CLP** | Medido |
 | El mismo monto estimado sobre el 100 % de las ventas a Corea del Sur. El cálculo medido cubre solo el 73 % de sus litros | ~776 millones de CLP | Inferido |
-| Margen que dejaron los 216.567 litros adicionales que Corea del Sur vendió en el segundo semestre | 371 millones de CLP | Medido |
-| Margen que se recuperaría si el descuento de Corea del Sur tuviera un tope de 8 %, el máximo de los demás mercados, con el mismo volumen | **286 millones de CLP** | Medido |
-| Volumen que Corea del Sur podría perder con ese tope de 8 % sin que baje el margen total que deja | hasta **13 %** de sus litros | Inferido |
+| Margen estimado para los 216.567 litros adicionales que Corea del Sur vendió en el segundo semestre, usando su margen observado por litro | 371 millones de CLP | Inferido |
+| Recuperación simulada si el descuento de Corea del Sur tuviera un tope de 8 %, el máximo de los demás mercados, con el mismo volumen | **286 millones de CLP** | Inferido |
+| Caída de volumen tolerable en ese escenario antes de igualar el margen actual | hasta **13,2 %** de sus litros | Inferido |
 
-**Lectura:** el argumento principal es el tope de 8 %: recupera 286 millones de CLP al año y conviene mientras Corea del Sur no reduzca sus compras más de 13 %. Como referencia, el descuento extra (569 MM) supera el margen que dejaron los litros adicionales del segundo semestre (371 MM), pero esa comparación supone que sin descuento Corea no habría crecido.
+**Lectura:** el argumento principal es el tope de 8 %: en un escenario calculado, recuperaría 286 millones de CLP al año con el mismo volumen y seguiría igualando el margen actual mientras Corea del Sur no reduzca sus compras más de 13,2 %. Como referencia, el descuento extra observado (569 MM) supera el margen estimado para los litros adicionales del segundo semestre (371 MM), pero esa comparación supone que sin descuento Corea no habría crecido.
 
 ---
 
 ## Recomendación a la gerencia
 
-**Corea del Sur es hoy el mercado que más crece y el que menos deja por litro. La causa es el descuento especial, no el producto ni el costo.**
+**Corea del Sur es hoy el mercado que más crece y el que menos deja por litro. La diferencia de descuento explica aproximadamente el 93 % de la brecha observada; precio de lista, costo y mezcla de tiers son similares, aunque los datos no permiten demostrar causalidad exclusiva.**
 
 En 2025, Corea del Sur aumentó sus compras en 34 % entre el primer y el segundo semestre, mientras siete de los diez mercados de exportación bajaron. Sin embargo, cada litro vendido allí dejó **1.715 pesos de margen, contra 2.270 en el resto** (−24 %). Corea del Sur compra el mismo vino, en la misma mezcla de varietal, reserva y gran reserva, al mismo precio de lista y con el mismo costo de producción. La única diferencia es el descuento: **13,5 % contra 2,6 %**. Ese descuento, decidido por el directorio sin un análisis de margen, costó **569 millones de pesos en 2025**.
 
 Recomendamos:
 
-1. **Revisar el descuento especial de Corea del Sur antes de renovar los contratos de 2026.** Ponerle un tope de 8 %, igual al máximo de los demás mercados, recuperaría unos **286 millones de pesos al año**. Esa medida conviene mientras Corea del Sur no reduzca sus compras en más de 13 %. La viña ya tiene la presencia que buscaba con el descuento; ahora le toca cobrar por ella.
+1. **Revisar el descuento especial de Corea del Sur antes de renovar los contratos de 2026.** Ponerle un tope de 8 %, igual al máximo de los demás mercados, recuperaría unos **286 millones de pesos al año** en este escenario calculado. La medida seguiría igualando el margen actual mientras Corea del Sur no reduzca sus compras en más de 13,2 %. La viña ya tiene la presencia que buscaba con el descuento; ahora le toca cobrar por ella.
 2. **Poner más esfuerzo comercial en México y Brasil**, que crecieron (+7 % y +7 %) dejando un margen igual o mayor al promedio. Ahí el crecimiento es valor real. En Brasil hay que vigilar el cierre de año: su cuarto trimestre quedó bajo el primero.
 3. **Evaluar desde ahora cada descuento especial con su margen por litro**, no solo con los litros que trae. Medir solo litros, como se hace hoy, presenta a Corea del Sur como el mejor mercado del año.
 4. **Corregir el registro de ventas.** Una de cada cuatro líneas del ERP no permite calcular margen: falta la moneda, el monto no cuadra o falta el costo de la añada. Se adjuntan los 1.507 venta_id que Finanzas debe cotejar con el papel.

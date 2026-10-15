@@ -177,7 +177,7 @@ def limpiar_ventas(v_raw: pd.DataFrame, mercados: pd.DataFrame) -> tuple[pd.Data
     m = mercados.copy()
     info["mercados_zona_inexistente"] = m.loc[m["zona_id"] == 8, "pais"].tolist()
     m.loc[m["zona_id"] == 8, "zona_id"] = 5
-    v = v.merge(m[["mercado_id", "canal"]], on="mercado_id", how="left")
+    v = v.merge(m[["mercado_id", "canal"]], on="mercado_id", how="left", validate="many_to_one")
     v["es_descarte"] = v["cajas"] < 0
     return v, info
 
@@ -185,11 +185,13 @@ def limpiar_ventas(v_raw: pd.DataFrame, mercados: pd.DataFrame) -> tuple[pd.Data
 def integrar(v: pd.DataFrame, costos: pd.DataFrame, productos: pd.DataFrame,
              emb: pd.DataFrame, dolar: pd.DataFrame) -> pd.DataFrame:
     """Une ventas + costos + embarques + dólar y marca el motivo de exclusión de cada línea."""
-    f = v.merge(costos, on=["producto_id", "anada"], how="left")
+    f = v.merge(costos, on=["producto_id", "anada"], how="left", validate="many_to_one")
     f = f.merge(productos[["producto_id", "formato", "litros_por_caja"]]
-                .rename(columns={"litros_por_caja": "litros_por_caja_formato"}), on="producto_id", how="left")
+                .rename(columns={"litros_por_caja": "litros_por_caja_formato"}), on="producto_id", how="left",
+                validate="many_to_one")
     f = f.merge(emb[["venta_id", "embarque_id", "fecha_embarque", "incoterm", "puerto_destino",
-                     "mercado_id_embarque", "cajas_embarque"]], on="venta_id", how="left")
+                     "mercado_id_embarque", "cajas_embarque"]], on="venta_id", how="left",
+                validate="many_to_one")
 
     # Dólar observado: último valor publicado a esa fecha (fines de semana y feriados usan el día hábil anterior)
     f["dolar_factura"], f["dolar_respaldo_factura"] = dolar_a_fecha(f["fecha_factura"], dolar)
@@ -202,8 +204,13 @@ def integrar(v: pd.DataFrame, costos: pd.DataFrame, productos: pd.DataFrame,
 
     # Cajas del ERP vs. cajas del embarque (en descartes el ERP va negativo y el embarque positivo)
     f["cajas_calza_embarque"] = f["cajas_embarque"].isna() | (f["cajas"].abs() == f["cajas_embarque"])
-
-    motivo = pd.Series(pd.NA, index=f.index, dtype="object")
+    f["mercado_embarque_coincide"] = (
+        f["embarque_id"].notna() & (f["mercado_id"] == f["mercado_id_embarque"])
+    )
+    f["embarque_posterior_factura"] = (
+        f["fecha_embarque"].notna() & f["fecha_factura"].notna()
+        & (f["fecha_embarque"] > f["fecha_factura"])
+    )
     reglas = [
         ("sin_moneda", f["moneda_id"].isna()),
         ("monto_no_calza", ~f["monto_calza"]),
@@ -211,18 +218,30 @@ def integrar(v: pd.DataFrame, costos: pd.DataFrame, productos: pd.DataFrame,
         ("exportacion_sin_embarque", (f["canal"] == "Exportación") & f["embarque_id"].isna()),
         ("sin_costo_para_la_anada", f["costo_caja_clp"].isna() | f["litros_por_caja"].isna()),
     ]
+    for nombre, cond in reglas:
+        f[f"flag_{nombre}"] = cond.fillna(False)
+    motivo = pd.Series(pd.NA, index=f.index, dtype="object")
     for nombre, cond in reglas:  # se asigna el primer motivo que aplique
         motivo = motivo.mask(motivo.isna() & cond.fillna(False), nombre)
-    f["motivo_exclusion"] = motivo
-    f["incluida"] = f["motivo_exclusion"].isna()  # universo del MARGEN
+    f["motivo_principal_exclusion_margen"] = motivo
+    f["incluida"] = f["motivo_principal_exclusion_margen"].isna()  # universo del MARGEN
+    f["embarque_confiable_sensibilidad"] = (
+        (f["canal"] == "Exportación")
+        & f["incluida"]
+        & f["mercado_embarque_coincide"]
+        & f["embarque_posterior_factura"]
+    )
 
     # Universo del VOLUMEN: los litros no dependen de moneda ni de costo (el correo pide excluir esas
     # líneas del margen, no del volumen). Solo salen las líneas cuyas cajas son dudosas:
     # cajas registradas en botellas (monto = 1/12 de lo esperado) o cajas que no calzan con el embarque.
     f["cajas_en_botellas"] = ((f["ratio_monto"] - 1 / 12).abs() < 0.01).fillna(False)
+    f["flag_cajas_registradas_en_botellas"] = f["cajas_en_botellas"]
+    f["flag_cajas_no_calzan_con_embarque_volumen"] = ~f["cajas_calza_embarque"]
     f["incluida_volumen"] = ~f["cajas_en_botellas"] & f["cajas_calza_embarque"]
-    f["motivo_exclusion_volumen"] = np.where(f["cajas_en_botellas"], "cajas_registradas_en_botellas",
-                                             np.where(~f["cajas_calza_embarque"], "cajas_no_calzan_con_embarque", None))
+    f["motivo_principal_exclusion_volumen"] = np.where(
+        f["cajas_en_botellas"], "cajas_registradas_en_botellas",
+        np.where(~f["cajas_calza_embarque"], "cajas_no_calzan_con_embarque", None))
     # 9 L por caja según formato (correo: 12x750 y 6x1500 son 9 L); no se usa el costo de otra añada
     f["litros_volumen"] = f["cajas"] * f["litros_por_caja_formato"]
     f["dias_factura_a_embarque"] = (f["fecha_embarque"] - f["fecha_factura"]).dt.days

@@ -78,7 +78,9 @@ def leer_dolar(offline: bool = False) -> tuple[pd.DataFrame, str]:
         series.extend(serie)
     df = pd.DataFrame(series)
     # mindicador entrega medianoche de Chile expresada en UTC (03:00Z / 04:00Z): la fecha es la parte de día
-    df["fecha"] = pd.to_datetime(df["fecha"].str[:10])
+    # El caché contiene timestamps ISO-8601; el formato explícito evita que
+    # pandas intente inferir formatos mixtos y mantiene una fecha civil estable.
+    df["fecha"] = pd.to_datetime(df["fecha"].str[:10], format="%Y-%m-%d")
     df = df.rename(columns={"valor": "dolar_observado"})[["fecha", "dolar_observado"]]
     df = df.drop_duplicates("fecha").sort_values("fecha").reset_index(drop=True)
     return df, ", ".join(origenes)
