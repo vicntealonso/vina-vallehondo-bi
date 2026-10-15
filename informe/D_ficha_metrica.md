@@ -79,10 +79,10 @@ No hay un extracto del año anterior. El correo dice: "no hay un extracto del a�
 |---|---|---|---|---|---|---|
 | **Corea del Sur** | **+33,8 %** | **1.715** | **1.679** | −35 (−2,1 %) | 42,0 → 41,5 | **Creció dejando poco margen** |
 | México | +7,3 % | 2.327 | 2.296 | −31 (−1,3 %) | 49,1 → 48,8 | Creció con buen margen |
-| Brasil | +6,6 % | 2.235 | 2.178 | −56 (−2,5 %) | 48,6 → 47,9 | Creció con buen margen |
+| Brasil | +6,6 % | 2.234 | 2.178 | −56 (−2,5 %) | 48,6 → 47,9 | Creció con buen margen |
 | Reino Unido | −4,6 % | 2.247 | 2.203 | −44 (−2,0 %) | 48,8 → 48,3 | No creció |
 | Alemania | −5,1 % | 2.307 | 2.250 | −57 (−2,5 %) | 49,0 → 48,4 | No creció |
-| Japón | −7,2 % | 2.305 | 2.258 | −46 (−2,0 %) | 49,2 → 48,7 | No creció |
+| Japón | −7,2 % | 2.304 | 2.258 | −46 (−2,0 %) | 49,2 → 48,7 | No creció |
 | China | −10,0 % | 2.217 | 2.170 | −47 (−2,1 %) | 48,3 → 47,8 | No creció |
 | Estados Unidos | −13,7 % | 2.278 | 2.237 | −41 (−1,8 %) | 48,9 → 48,5 | No creció |
 | Países Bajos | −16,4 % | 2.240 | 2.208 | −32 (−1,4 %) | 48,8 → 48,4 | No creció |
@@ -136,4 +136,4 @@ Motivos de exclusión del margen: 1.910 líneas sin costo para su añada (13,7 %
 
 Las líneas sin costo para su añada se reparten de forma pareja entre los mercados de exportación: en cada uno representan entre el 12,5 % y el 16,3 % de sus líneas (Corea del Sur: 15,0 %). Por eso no sesgan la comparación entre mercados.
 
-Hay 44 líneas con fecha 1-ene-2025, que es feriado. Para ellas se usa el dólar del 2-ene-2025, el primer valor de la serie 2025, porque la API no entregó la serie 2024 con el día hábil anterior. El efecto sobre el margen anual es despreciable.
+Hay líneas con fecha 1-ene-2025, que es feriado. Para ellas se usa el dólar observado del 30-dic-2024 (992,12 CLP/USD, publicado por el SII), que es el último día hábil anterior: el 31 de diciembre es feriado bancario. Queda guardado en el caché versionado y no se requiere respaldo de tipo de cambio. La ejecución online y offline produce las mismas salidas.

@@ -41,6 +41,9 @@ def main():
     productos, costos, info_costos = transform.limpiar_costos(costos_raw)
     emb, info_emb = transform.limpiar_embarques(emb_raw)
     ventas, info_ventas = transform.limpiar_ventas(sql["ventas"], sql["mercados"])
+    info_emb["lineas_sin_venta"] = int((~emb["venta_id"].isin(ventas["venta_id"])).sum())
+    info_emb["venta_ids_sin_venta"] = sorted(
+        emb.loc[~emb["venta_id"].isin(ventas["venta_id"]), "venta_id"].unique().tolist())
     integrado = transform.integrar(ventas, costos, productos, emb, dolar)
 
     print("3/6 Modelo dimensional -> output/modelo_vallehondo.sqlite")
@@ -53,6 +56,7 @@ def main():
     assert sin_tc.empty, f"{len(sin_tc)} líneas del margen quedaron sin conversión a pesos"
     t = metrics.tabla_mercados(h, "factura", "semestre")
     s = metrics.sensibilidad(h)
+    s_conf = metrics.sensibilidad(h, solo_confiable=True)
     poco = t[t["clasificacion"] == "Creció dejando poco margen"]
     critico = poco.index[0] if len(poco) else t["margen_clp_por_litro"].idxmin()
     caso = metrics.caso_negocio(h, t, critico)
@@ -61,12 +65,24 @@ def main():
 
     t.to_csv(config.OUT / "tabla_mercados.csv", encoding="utf-8-sig")
     s.to_csv(config.OUT / "sensibilidad_definiciones.csv", encoding="utf-8-sig")
+    s_conf.to_csv(config.OUT / "sensibilidad_embarque_confiable.csv", encoding="utf-8-sig")
     cob.to_csv(config.OUT / "cobertura.csv", index=False, encoding="utf-8-sig")
     caso["por_tier"].to_csv(config.OUT / "precio_costo_por_tier.csv", index=False, encoding="utf-8-sig")
     caso["mix_tier_pct"].to_csv(config.OUT / "mix_tier.csv", index=False, encoding="utf-8-sig")
+    pd.DataFrame([{
+        "mercado": caso["mercado"],
+        "tipo": "escenario_calculado",
+        "tope_descuento_pct": caso["tope_descuento"] * 100,
+        "descuento_actual_clp": t.loc[critico, "descuento_clp"],
+        "recuperable_clp": caso["recuperable_tope_clp"],
+        "margen_actual_clp": t.loc[critico, "margen_clp"],
+        "margen_con_tope_clp": t.loc[critico, "margen_clp"] + caso["recuperable_tope_clp"],
+        "caida_volumen_equilibrio_pct": caso["perdida_volumen_equilibrio_pct"],
+    }]).to_csv(config.OUT / "escenario_tope_descuento.csv", index=False, encoding="utf-8-sig")
     # Líneas a cotejar con Finanzas (correo: "mándennos los venta_id")
-    a_revisar = h[h["motivo_exclusion_margen"].isin(["sin_moneda", "monto_no_calza", "cajas_no_calzan_con_embarque"])]
-    a_revisar[["venta_id", "motivo_exclusion_margen"]].sort_values("venta_id").to_csv(
+    a_revisar = h[h["motivo_principal_exclusion_margen"].isin(
+        ["sin_moneda", "monto_no_calza", "cajas_no_calzan_con_embarque"])]
+    a_revisar[["venta_id", "motivo_principal_exclusion_margen"]].sort_values("venta_id").to_csv(
         config.OUT / "venta_ids_para_finanzas.csv", index=False, encoding="utf-8-sig")
 
     print("5/6 Gráficos -> output/figuras/")
@@ -92,7 +108,11 @@ def main():
         f"- Descuento extra sobre el del resto de los mercados: {fmt(caso['exceso_descuento_clp'] / 1e6)} millones CLP en 2025 "
         f"(solo líneas dentro del margen)",
         f"- Brecha de margen vs resto: {fmt(caso['brecha_margen_clp'] / 1e6)} millones CLP",
-        f"- Litros extra del S2: {fmt(caso['litros_extra_S2'])} L, que dejaron {fmt(caso['margen_de_litros_extra_clp'] / 1e6)} millones CLP de margen",
+        f"- [Inferido] Litros extra estimados del S2: {fmt(caso['litros_extra_S2_estimados'])} L, que habrían dejado "
+        f"{fmt(caso['margen_estimado_litros_extra_clp'] / 1e6)} millones CLP al margen observado de Corea",
+        f"- [Escenario calculado] Tope de descuento de {fmt(caso['tope_descuento'] * 100, 1)} %: recuperaría "
+        f"{fmt(caso['recuperable_tope_clp'] / 1e6)} millones CLP con el mismo volumen y toleraría una caída de "
+        f"{fmt(caso['perdida_volumen_equilibrio_pct'], 1)} % antes de igualar el margen actual",
         "",
         "## Tabla por mercado (dólar a fecha de factura, S2 vs S1)",
         "",
@@ -104,6 +124,16 @@ def main():
         md(s[["margen_L_factura", "margen_L_embarque", "dif_margen_L", "dif_margen_L_pct", "rank_factura", "rank_embarque",
            "clasif_factura", "clasif_embarque", "crec_S2_vs_S1_pct", "crec_T4_vs_T1_pct", "clasif_T4_vs_T1"]]
         .round(1)),
+        "",
+        "## Robustez: sensibilidad solo con embarques confiables",
+        "",
+        f"Líneas de exportación cuyo embarque coincide en mercado con la venta y es posterior a la factura: "
+        f"{fmt(calidad['lineas_sensibilidad_confiable'])}. "
+        f"Clasificaciones que cambian entre factura y embarque: "
+        f"{int((s_conf['clasif_factura'] != s_conf['clasif_embarque']).sum())}.",
+        "",
+        md(s_conf[["margen_L_factura", "margen_L_embarque", "dif_margen_L_pct", "rank_factura", "rank_embarque",
+                   "clasif_factura", "clasif_embarque"]].round(1)),
         "",
         f"Mediana días factura→embarque: {fmt(calidad['dias_factura_a_embarque_mediana'])}; "
         f"embarques con fecha anterior a la factura: {fmt(calidad['pct_embarque_antes_de_factura'], 1)} %",

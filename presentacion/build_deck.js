@@ -27,7 +27,7 @@ const FUENTE = "Fuente: ERP Viña Vallehondo 2025, costos por producto y añada,
 
 const MERCADOS = ["Corea del Sur", "México", "Brasil", "Reino Unido", "Alemania", "Japón", "China", "Estados Unidos", "Países Bajos", "Canadá"];
 const CREC = [33.8, 7.3, 6.6, -4.6, -5.1, -7.2, -10.0, -13.7, -16.4, -21.6];
-const MARGEN_F = [1715, 2327, 2235, 2247, 2307, 2305, 2217, 2278, 2240, 2274];
+const MARGEN_F = [1715, 2327, 2234, 2247, 2307, 2304, 2217, 2278, 2240, 2274];
 const MARGEN_E = [1679, 2296, 2178, 2203, 2250, 2258, 2170, 2237, 2208, 2229];
 
 async function main() {

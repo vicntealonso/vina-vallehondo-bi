@@ -1,4 +1,4 @@
-﻿venta_id,motivo_exclusion_margen
+﻿venta_id,motivo_principal_exclusion_margen
 400023,cajas_no_calzan_con_embarque
 400032,monto_no_calza
 400041,sin_moneda

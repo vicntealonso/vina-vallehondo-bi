@@ -6,7 +6,9 @@ Este repositorio contiene la cadena completa: lee las cuatro fuentes, las limpia
 
 ## Cómo instalar
 
-Requiere Python 3.10 o superior.
+Entorno validado: Python 3.10. El proyecto tuvo inestabilidad con las versiones
+originalmente fijadas al ejecutarse bajo Python 3.13, por lo que Python 3.10 es
+la referencia para reproducir los resultados.
 
 ```bash
 python3 -m venv .venv
@@ -43,6 +45,7 @@ Y en `output/`:
 | `modelo_vallehondo.sqlite` | Modelo estrella: `fact_venta_linea` y 6 dimensiones |
 | `tabla_mercados.csv` | Métrica por mercado con la definición elegida |
 | `sensibilidad_definiciones.csv` | Resultado con el dólar a fecha de factura y a fecha de embarque, y con crecimiento S2/S1 y T4/T1 |
+| `escenario_tope_descuento.csv` | Escenario calculado de tope de descuento para el mercado crítico y su punto de equilibrio |
 | `cobertura.csv` | Líneas que quedan fuera de cada cálculo y por qué |
 | `precio_costo_por_tier.csv`, `mix_tier.csv` | Precio de lista, precio neto, costo y mezcla de tiers por mercado |
 | `venta_ids_para_finanzas.csv` | Ventas que hay que cotejar con Finanzas: sin moneda, monto que no cuadra o cajas que no cuadran |
@@ -56,7 +59,7 @@ Y en `output/`:
 | Base SQLite del ERP | `data/raw/origen_vina.sqlite` | Ventas, clientes, mercados, zonas, cepas y monedas |
 | CSV de Costos | `data/raw/origen_costos_productos.csv` | Costo por caja según producto y añada, y litros por caja |
 | JSON de embarques | `data/raw/origen_embarques.json` | Fecha de embarque, incoterm, puerto y cajas embarcadas |
-| API mindicador.cl | `https://mindicador.cl/api/dolar/{2025,2026}` | Dólar observado diario. Se guarda una copia en `data/cache/` |
+| API mindicador.cl | `https://mindicador.cl/api/dolar/{2024,2025,2026}` | Dólar observado diario. Se guarda una copia versionada en `data/cache/` |
 
 ## Estructura del código
 
@@ -89,11 +92,15 @@ Todos se documentan en el código y en la bitácora del informe.
 - **Columna `mes` del ERP:** no se usa, porque no coincide con la fecha en 882 filas.
 - **Cajas registradas en botellas:** en 125 líneas el monto vale 1/12 de lo esperado. Se excluyen.
 - **Cajas que no cuadran con el embarque:** en 56 líneas las cajas del ERP son 10 veces las del embarque. Se excluyen.
+- **Sensibilidad factura/embarque:** usa solo líneas de exportación incluidas en margen cuyo mercado coincide con el embarque y cuyo embarque ocurre después de la factura.
+- **Flags de calidad:** cada defecto conserva su `flag_*`; `motivo_principal_exclusion_*` solo identifica el primer motivo aplicado.
+- **Crecimiento:** se calcula explícitamente sobre fechas de factura del año 2025.
 - **Monto que no cuadra** con cajas × precio × (1 − descuento): esas líneas salen del margen y se informan a Finanzas.
 - **Costo:** se usa el de la añada de la línea. Si falta, la línea sale del margen. No se toma el costo de otra añada.
 - **Descartes (cajas negativas):** restan ingreso y litros. El costo no se reversa.
 - **Corea del Sur** tiene zona_id 8, que no existe en la tabla de zonas. Se asigna a Asia.
-- **Dólar en fines de semana y feriados:** se usa el último día hábil anterior. Para el 1-ene-2025 se usa el valor del 31-dic-2024 si está la serie 2024; si no, el del 2-ene-2025.
+- **Dólar en fines de semana y feriados:** se usa el último día hábil anterior disponible en el caché versionado. Las facturas del 1-ene-2025 (feriado) usan el dólar observado del 30-dic-2024, último día hábil bancario: 992,12 CLP/USD. Ese valor se tomó del SII (sii.cl/valores_y_fechas/dolar/dolar2024.htm) porque la API de mindicador no respondía; el 31-dic-2024 es feriado bancario y no tiene valor publicado. El SII coincide con mindicador en las fechas verificadas (2-ene-2025: 996,46).
+- **Embarques huérfanos:** las líneas de embarque cuyo `venta_id` no existe en el ERP no entran al modelo, pero se cuentan y listan en `info_calidad.json`.
 
 ## Informe
 

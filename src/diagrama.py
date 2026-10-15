@@ -131,7 +131,7 @@ def generar():
                      ("", "costo_clp"),
                      ("", "margen_clp  (factura | embarque)")]),
         ("Calidad y cobertura", [("", "incluida_margen · incluida_volumen"),
-                                 ("", "motivo_exclusion_*"),
+                                 ("", "motivo_principal_exclusion_* + flags"),
                                  ("", "es_descarte · fecha_imputada")]),
     ])
 
