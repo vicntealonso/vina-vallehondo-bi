@@ -19,3 +19,10 @@ informe/_informe_render.html
 /origen_embarques.json
 node_modules/
 presentacion/_qa.pdf
+
+# informe/: en el repositorio solo van E1_TIN.docx y E1_TIN.pdf; el resto queda local
+informe/*
+!informe/E1_TIN.docx
+!informe/E1_TIN.pdf
+# presentacion/: solo local
+presentacion/

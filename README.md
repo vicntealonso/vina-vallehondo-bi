@@ -4,6 +4,8 @@
 
 Este repositorio contiene la cadena completa: lee las cuatro fuentes, las limpia, las integra, construye un modelo dimensional y calcula, desde ese modelo, todas las cifras y gráficos del informe.
 
+**Informe:** [`informe/E1_TIN.pdf`](informe/E1_TIN.pdf) (versión editable en `informe/E1_TIN.docx`).
+
 ## Cómo instalar
 
 Entorno validado: Python 3.10. El proyecto tuvo inestabilidad con las versiones
@@ -50,7 +52,7 @@ Y en `output/`:
 | `precio_costo_por_tier.csv`, `mix_tier.csv` | Precio de lista, precio neto, costo y mezcla de tiers por mercado |
 | `venta_ids_para_finanzas.csv` | Ventas que hay que cotejar con Finanzas: sin moneda, monto que no cuadra o cajas que no cuadran |
 | `info_calidad.json` | Conteos de calidad de datos por fuente |
-| `figuras/*.png` | Los 4 gráficos del informe |
+| `figuras/*.png` | Los 4 gráficos del informe y el diagrama del modelo dimensional |
 
 ## Fuentes
 
