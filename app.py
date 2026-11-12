@@ -119,7 +119,8 @@ with tab1:
         linea_0 = alt.Chart(pd.DataFrame({"x": [0]})).mark_rule(color="#999").encode(x="x:Q")
         st.altair_chart((linea_0 + linea_u + puntos + etiquetas).properties(height=380), use_container_width=True)
         st.caption(f"Línea punteada: umbral de buen margen ({sem.DEFINICIONES['umbral'][umbral].split(' (')[0].lower()}"
-                   f" = {fmt(t['umbral'].iloc[0], dec)} {u}). A la derecha de la línea vertical, los mercados que crecieron.")
+                   f" = {fmt(t['umbral'].iloc[0], dec)} {u}). A la derecha de la línea vertical, los mercados que crecieron. "
+                   "El eje vertical no parte en cero para separar los mercados; las barras de la derecha sí parten en cero.")
 
     # ------------------------------------------------------------ corte por la dimensión principal
     with g2:
