@@ -26,3 +26,5 @@ informe/*
 !informe/E1_TIN.pdf
 # presentacion/: solo local
 presentacion/
+
+output/*.tmp

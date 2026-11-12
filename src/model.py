@@ -2,7 +2,11 @@
 
 Grano de fact_venta_linea: una fila es una línea de venta (venta_id único) — un producto de una
 añada, vendido a un cliente de un mercado, en una factura, con su embarque asociado si es exportación.
+
+Estrella pura (corrección E2): cada dimensión se une solo al hecho. Ninguna dimensión apunta a otra
+(en la E1 dim_cliente y dim_embarque llevaban mercado_id, lo que formaba un copo de nieve).
 """
+import os
 import sqlite3
 
 import pandas as pd
@@ -36,7 +40,8 @@ def construir(f: pd.DataFrame, sql: dict, productos: pd.DataFrame, dolar: pd.Dat
     dim_producto = productos.merge(cepas, on="cepa", how="left", validate="many_to_one")[
         ["producto_id", "producto", "cepa", "tipo_vino", "tier", "formato", "litros_por_caja"]]
 
-    dim_cliente = sql["clientes"][["cliente_id", "nombre", "tipo", "mercado_id"]].copy()
+    # El mercado de la venta ya está en el hecho; dim_cliente no apunta a dim_mercado
+    dim_cliente = sql["clientes"][["cliente_id", "nombre", "tipo"]].rename(columns={"tipo": "tipo_cliente"})
     dim_moneda = sql["monedas"].copy()
 
     emb = (f[["embarque_id", "fecha_embarque", "incoterm", "puerto_destino", "mercado_id_embarque"]]
@@ -44,8 +49,11 @@ def construir(f: pd.DataFrame, sql: dict, productos: pd.DataFrame, dolar: pd.Dat
     emb["embarque_key"] = emb.index + 1  # hay embarque_id repetidos con datos distintos: llave sustituta
     f = f.merge(emb, on=["embarque_id", "fecha_embarque", "incoterm", "puerto_destino", "mercado_id_embarque"],
                 how="left", validate="many_to_one")
-    dim_embarque = emb.assign(fecha_embarque=emb["fecha_embarque"].dt.strftime("%Y-%m-%d"))[
-        ["embarque_key", "embarque_id", "fecha_embarque", "incoterm", "puerto_destino", "mercado_id_embarque"]]
+    # El país de destino del embarque queda como texto (desnormalizado), no como llave a dim_mercado
+    paises = sql["mercados"].set_index("mercado_id")["pais"]
+    dim_embarque = emb.assign(fecha_embarque=emb["fecha_embarque"].dt.strftime("%Y-%m-%d"),
+                              pais_destino_embarque=emb["mercado_id_embarque"].map(paises))[
+        ["embarque_key", "embarque_id", "fecha_embarque", "incoterm", "puerto_destino", "pais_destino_embarque"]]
 
     fact = pd.DataFrame({
         "venta_id": f["venta_id"],
@@ -111,11 +119,16 @@ def construir(f: pd.DataFrame, sql: dict, productos: pd.DataFrame, dolar: pd.Dat
     }
 
 
-def guardar(tablas: dict[str, pd.DataFrame]) -> None:
-    config.OUT.mkdir(parents=True, exist_ok=True)
-    if config.MODELO_PATH.exists():
-        config.MODELO_PATH.unlink()
-    con = sqlite3.connect(config.MODELO_PATH)
+def guardar(tablas: dict[str, pd.DataFrame], ruta=None) -> None:
+    """Carga completa e idempotente: escribe un archivo nuevo y recién al final reemplaza el anterior,
+    así una corrida que falla a mitad de camino nunca deja un modelo a medias."""
+    ruta = ruta or config.MODELO_PATH
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    tmp = ruta.with_suffix(".tmp")
+    if tmp.exists():
+        tmp.unlink()
+    con = sqlite3.connect(tmp)
     for nombre, df in tablas.items():
         df.to_sql(nombre, con, index=False)
     con.close()
+    os.replace(tmp, ruta)
