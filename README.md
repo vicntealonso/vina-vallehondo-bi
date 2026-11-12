@@ -1,10 +1,18 @@
-# Viña Vallehondo — Entrega 1 (IIC3752, Grupo V1)
+# Viña Vallehondo — Entrega 2 (IIC3752, Grupo V1)
 
 **Pregunta (P3 del README del caso):** ¿Qué mercados crecieron en volumen y, de esos, cuáles dejaron buen margen y cuáles crecieron dejando poco?
 
-Este repositorio contiene la cadena completa: lee las cuatro fuentes, las limpia, las integra, construye un modelo dimensional y calcula, desde ese modelo, todas las cifras y gráficos del informe.
+Este repositorio contiene la cadena completa y el prototipo. La cadena lee las cuatro fuentes, las guarda en una capa cruda, las depura, construye un modelo estrella, corre 17 pruebas de calidad y calcula todas las cifras desde una capa semántica única. El prototipo (`app.py`) lee esa misma capa, así que muestra los mismos números que el informe.
 
-**Informe:** [`informe/E1_TIN.pdf`](informe/E1_TIN.pdf) (versión editable en `informe/E1_TIN.docx`).
+**Informe E1:** [`informe/E1_TIN.pdf`](informe/E1_TIN.pdf).
+
+## Inicio rápido (tres comandos)
+
+```bash
+pip install -r requirements.txt
+python run.py                 # cadena completa + pruebas de calidad
+streamlit run app.py          # abre el prototipo en http://localhost:8501
+```
 
 ## Cómo instalar
 
@@ -28,7 +36,9 @@ python run.py --offline    # usa directamente la copia local del dólar observad
 ## Cuánto demora
 
 - Instalación: unos 15 segundos.
-- Ejecución: unos 2 segundos con `--offline`. Sin esa opción, si la API de mindicador.cl no responde, la cadena espera unos 30 segundos antes de usar la copia local.
+- Ejecución de la cadena: unos 5 segundos con `--offline`. Sin esa opción, si la API de mindicador.cl no responde, la cadena espera unos 30 segundos antes de usar la copia local.
+- Pruebas automatizadas (`python -m unittest discover -s tests`): unos 25 segundos.
+- Apertura del prototipo: unos 5 segundos la primera vez.
 
 ## Qué se espera ver al final
 
@@ -37,7 +47,33 @@ En la consola:
 ```
 Mercado crítico: Corea del Sur | crecimiento 33,8 % | margen 1.715 CLP/L vs 2.270 del resto | descuento extra 569 MM CLP
 Líneas fuera del margen: 25,6 % | Tiempo total: ...
+Pruebas de calidad: 17/17 OK, 0 avisos, 0 fallas → output/calidad_ultima_corrida.csv
+Prototipo: streamlit run app.py
 ```
+
+Con `--offline` (o si la API no responde) la prueba F6 queda en **AVISO** (16/17 OK): es esperado, el dólar sale de la copia local.
+
+## Cómo abrir el prototipo
+
+```bash
+streamlit run app.py
+```
+
+Se abre en el navegador (http://localhost:8501). Una pantalla responde la pregunta: filtros de fecha de conversión (factura o embarque), moneda (pesos o dólares), ventana de crecimiento y umbral de buen margen; la cifra clave con su cobertura; el gráfico que la explica; el corte por mercado y el detalle separado en recomendación, hipótesis a validar y sin acción. La pestaña **Definición y detalle** muestra la comparación factura vs embarque, el valor de cada punto de mezcla, las definiciones y el resultado de las pruebas de calidad.
+
+El prototipo se actualiza solo: lee el modelo que deja `python run.py`, así que basta volver a correr la cadena y recargar la página.
+
+## Arquitectura por capas
+
+| Capa | Dónde | Qué ocurre | Pruebas |
+|---|---|---|---|
+| 1. Orígenes | `data/raw/`, API mindicador.cl | Se leen sin modificar | — |
+| 2. Cruda | `output/capas/1_cruda.sqlite` | Copia de lo que llegó, todo como texto, con marca de carga y fuente | F1–F6 |
+| 3. Depurada | `output/capas/2_depurada.sqlite` | Formatos, duplicados, monedas, cajas, cruce con costos, embarques y dólar; marca de calidad por línea | — |
+| 4. Modelo | `output/modelo_vallehondo.sqlite` | Estrella: `fact_venta_linea` + 6 dimensiones | M1–M8 |
+| 5. Consumo | `src/semantica.py` → `output/` y `app.py` | La métrica definida una sola vez | C1–C3 |
+
+Carga **completa e idempotente**: cada corrida reescribe todas las capas, así que volver a correr no duplica ni pierde registros. Si una prueba **bloqueante** falla, la corrida se detiene, el modelo anterior queda intacto y el prototipo muestra en rojo la capa que falló y la fecha de la última corrida buena. Para probarlo: `python -m unittest tests.test_calidad`.
 
 Y en `output/`:
 
@@ -52,7 +88,11 @@ Y en `output/`:
 | `precio_costo_por_tier.csv`, `mix_tier.csv` | Precio de lista, precio neto, costo y mezcla de tiers por mercado |
 | `venta_ids_para_finanzas.csv` | Ventas que hay que cotejar con Finanzas: sin moneda, monto que no cuadra o cajas que no cuadran |
 | `info_calidad.json` | Conteos de calidad de datos por fuente |
-| `figuras/*.png` | Los 4 gráficos del informe y el diagrama del modelo dimensional |
+| `figuras/*.png` | Gráficos del informe, modelo (técnico y para la gerencia), arquitectura y linaje |
+| `calidad_ultima_corrida.csv` | Resultado de las 17 pruebas de calidad de la última corrida |
+| `estado_corrida.json` | Fecha de la última corrida, origen del dólar y resumen de pruebas (lo lee el prototipo) |
+| `capas/1_cruda.sqlite`, `capas/2_depurada.sqlite` | Capas cruda y depurada |
+| `sensibilidad_embarque_confiable.csv` | Prueba de solidez: factura vs embarque solo con embarques confiables |
 
 ## Fuentes
 
@@ -66,13 +106,18 @@ Y en `output/`:
 ## Estructura del código
 
 ```
-run.py            comando único que corre toda la cadena
-src/config.py     rutas y parámetros de definición
-src/extract.py    lee las 4 fuentes sin modificarlas
-src/transform.py  limpieza, integración y motivo de exclusión de cada línea
-src/model.py      modelo dimensional (estrella) en SQLite
-src/metrics.py    métrica, sensibilidad, caso de negocio y cobertura, calculados sobre el modelo
-src/figures.py    gráficos
+run.py              comando único que corre toda la cadena
+app.py              prototipo (Streamlit)
+src/config.py       rutas, parámetros de definición y acuerdo de servicio
+src/extract.py      lee las 4 fuentes sin modificarlas (con respaldo local del dólar)
+src/capas.py        guarda las capas cruda y depurada
+src/transform.py    limpieza, integración y marcas de calidad de cada línea
+src/model.py        modelo estrella en SQLite (escritura atómica)
+src/calidad.py      las 17 pruebas de calidad, con su acción si fallan
+src/semantica.py    capa semántica: cada métrica definida una sola vez
+src/metrics.py      salidas del informe (usa la capa semántica)
+src/figures.py, src/diagrama.py, src/diagramas_e2.py   gráficos y diagramas
+tests/              15 pruebas automatizadas, incluida una de punta a punta con una fuente rota
 ```
 
 ## Definición de la métrica
@@ -94,7 +139,8 @@ Todos se documentan en el código y en la bitácora del informe.
 - **Columna `mes` del ERP:** no se usa, porque no coincide con la fecha en 882 filas.
 - **Cajas registradas en botellas:** en 125 líneas el monto vale 1/12 de lo esperado. Se excluyen.
 - **Cajas que no cuadran con el embarque:** en 56 líneas las cajas del ERP son 10 veces las del embarque. Se excluyen.
-- **Sensibilidad factura/embarque:** usa solo líneas de exportación incluidas en margen cuyo mercado coincide con el embarque y cuyo embarque ocurre después de la factura.
+- **Sensibilidad factura/embarque:** la principal usa todas las líneas del margen. Como prueba de solidez se repite solo con las 2.648 líneas cuyo embarque coincide en mercado con la venta y es posterior a la factura (`sensibilidad_embarque_confiable.csv`).
+- **Recomendación vs hipótesis:** un mercado que creció tiene recomendación si su clase se mantiene en las 8 combinaciones de definición (2 fechas × 2 ventanas × 2 umbrales); si cambia en alguna, es hipótesis a validar (hoy, Brasil).
 - **Flags de calidad:** cada defecto conserva su `flag_*`; `motivo_principal_exclusion_*` solo identifica el primer motivo aplicado.
 - **Crecimiento:** se calcula explícitamente sobre fechas de factura del año 2025.
 - **Monto que no cuadra** con cajas × precio × (1 − descuento): esas líneas salen del margen y se informan a Finanzas.

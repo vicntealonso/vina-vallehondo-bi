@@ -1,8 +1,10 @@
 """Rutas y parámetros de la cadena. Todas las decisiones de definición viven aquí."""
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-RAW = ROOT / "data" / "raw"
+# VALLEHONDO_RAW permite apuntar a otra carpeta de fuentes (p. ej. para simular una fuente rota)
+RAW = Path(os.environ.get("VALLEHONDO_RAW", ROOT / "data" / "raw"))
 CACHE = ROOT / "data" / "cache"
 OUT = ROOT / "output"
 FIGS = OUT / "figuras"

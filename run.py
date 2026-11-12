@@ -14,7 +14,7 @@ import pandas as pd
 
 from datetime import datetime
 
-from src import calidad as qa, capas, config, diagrama, extract, figures, metrics, model, semantica, transform
+from src import calidad as qa, capas, config, diagrama, diagramas_e2, extract, figures, metrics, model, semantica, transform
 
 
 def fmt(x, dec=0):
@@ -103,6 +103,7 @@ def main():
     print("5/6 Gráficos -> output/figuras/")
     figures.generar_todas(h, t, s, caso)
     diagrama.generar()
+    diagramas_e2.generar_todos()
 
     print("6/6 Resumen -> output/resumen.md")
     info = {"costos": info_costos, "embarques": info_emb, "ventas": info_ventas, "calidad": calidad,
