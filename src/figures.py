@@ -29,6 +29,7 @@ plt.rcParams.update({
     "figure.dpi": 200, "savefig.facecolor": "white",
 })
 MILES = mtick.FuncFormatter(lambda x, _: f"{x:,.0f}".replace(",", "."))
+HIPOTESIS = {"Brasil"}  # lo actualiza generar_todas con semantica.estado_recomendacion
 COLOR_CLASE = {"Creció dejando poco margen": NARANJO, "Creció con buen margen": VERDE, "No creció": GRIS}
 
 
@@ -68,7 +69,8 @@ def fig1_cuadrante(t: pd.DataFrame, critico: str):
     brecha = 1 - t.loc[critico, "margen_clp_por_litro"] / (resto["margen_clp"].sum() / resto["litros_margen"].sum())
     fig, ax = _lienzo(10, 6, "Crecimiento en volumen (%) vs. margen por litro (CLP/L), por mercado · 2025",
                       "Solo 3 de 10 mercados crecieron, y el que más crece es el que menos deja por litro",
-                      "Tamaño del punto = litros del S2. Margen antes de flete; dólar a fecha de factura.",
+                      "Punto = litros del S2. Margen antes de flete, dólar de factura. "
+                      f"Cobertura: {fmt(t['litros_margen'].sum() / t['litros_volumen'].sum() * 100, 1)} % de los litros con margen.",
                       ax_rect=(0.09, 0.15, 0.87, 0.62))
     ax.set_xlim(-27, 40)
     ax.set_ylim(1640, 2420)
@@ -89,12 +91,16 @@ def fig1_cuadrante(t: pd.DataFrame, critico: str):
             continue
         dx, dy, ha = offsets.get(pais, (9, 7, "left"))
         destacado = r["clasificacion"] != "No creció"
-        ax.annotate("EE.UU." if pais == "Estados Unidos" else pais, (x, y), xytext=(dx, dy), ha=ha,
+        nombre = "EE.UU." if pais == "Estados Unidos" else pais
+        if pais in HIPOTESIS:
+            nombre += " (hipótesis)"
+        ax.annotate(nombre, (x, y), xytext=(dx, dy), ha=ha,
                     textcoords="offset points", fontsize=9, color=INK if destacado else INK_2,
                     fontweight="bold" if destacado else "normal", zorder=5)
     rc = t.loc[critico]
     ax.annotate(f"{critico}\n+{fmt(rc['crecimiento_litros_pct'])} % en litros\n"
-                f"{fmt(rc['margen_clp_por_litro'])} CLP/L: −{fmt(brecha * 100)} % vs. el resto",
+                f"{fmt(rc['margen_clp_por_litro'])} CLP/L: −{fmt(brecha * 100)} % vs. el resto\n"
+                f"(calculado sobre el {fmt(rc['cobertura_margen_pct'], 0)} % de sus litros)",
                 (rc["crecimiento_litros_pct"], rc["margen_clp_por_litro"]), xytext=(19, 1870),
                 fontsize=9, color=INK, ha="center", va="center", linespacing=1.35,
                 arrowprops=dict(arrowstyle="-", color=NARANJO, lw=1.2, shrinkB=9),
@@ -109,10 +115,12 @@ def fig1_cuadrante(t: pd.DataFrame, critico: str):
 
 # ---------------------------------------------------------------- Fig. 2 (sección D)
 
-def fig2_definiciones(s: pd.DataFrame):
+def fig2_definiciones(s: pd.DataFrame, t: pd.DataFrame):
     s = s.sort_values("margen_L_factura")
+    cob = t["cobertura_margen_pct"]
     fig, ax = _lienzo(8.5, 5.6, "Margen por litro (CLP/L) por mercado con las dos fechas de conversión · 2025",
                       "Con el dólar del embarque todos bajan ~2 %, pero el orden y la brecha de Corea del Sur se mantienen",
+                      "Entre paréntesis: % de los litros del mercado con margen calculado (cobertura).",
                       ax_rect=(0.17, 0.13, 0.78, 0.63))
     y = range(len(s))
     for i, (pais, r) in enumerate(s.iterrows()):
@@ -124,8 +132,9 @@ def fig2_definiciones(s: pd.DataFrame):
         if lbl.get_text() == "Corea del Sur":
             lbl.set_fontweight("bold"); lbl.set_color(INK)
     for i, (pais, r) in enumerate(s.iterrows()):
-        ax.text(r["margen_L_factura"] + 18, i, fmt(r["margen_L_factura"]), va="center", fontsize=8, color=INK_2)
-    ax.set_xlim(1600, 2420)
+        ax.text(r["margen_L_factura"] + 18, i, f"{fmt(r['margen_L_factura'])}  ({fmt(cob[pais], 0)} %)",
+                va="center", fontsize=8, color=INK_2)
+    ax.set_xlim(1600, 2480)
     ax.xaxis.set_major_formatter(MILES)
     ax.set_xlabel("Margen de producción (CLP por litro)")
     ax.grid(axis="y", visible=False)
@@ -204,8 +213,12 @@ def fig4_mensual(h: pd.DataFrame, critico: str):
 
 
 def generar_todas(h, t, s, caso):
+    from . import semantica
+    est = semantica.estado_recomendacion(h)
+    HIPOTESIS.clear()
+    HIPOTESIS.update(est.index[est["estado"] == "Hipótesis a validar"])
     critico = caso["mercado"]
     fig1_cuadrante(t, critico)
-    fig2_definiciones(s)
+    fig2_definiciones(s, t)
     fig3_cascada(caso)
     fig4_mensual(h, critico)

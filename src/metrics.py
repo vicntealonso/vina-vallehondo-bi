@@ -13,22 +13,10 @@ import sqlite3
 import numpy as np
 import pandas as pd
 
-from . import config
-
-SQL_BASE = """
-SELECT f.*, m.pais, m.canal, fd.anio, fd.semestre, fd.trimestre, fd.mes, p.tier, p.cepa
-FROM fact_venta_linea f
-JOIN dim_mercado m  ON m.mercado_id = f.mercado_id
-JOIN dim_fecha fd   ON fd.fecha_key = f.fecha_factura_key
-JOIN dim_producto p ON p.producto_id = f.producto_id
-"""
-
+from . import config, semantica
 
 def cargar_hechos() -> pd.DataFrame:
-    con = sqlite3.connect(config.MODELO_PATH)
-    df = pd.read_sql(SQL_BASE, con)
-    con.close()
-    return df
+    return semantica.cargar_hechos()
 
 
 def _periodos(definicion_crecimiento: str) -> tuple[str, str, str]:
@@ -43,41 +31,15 @@ def tabla_mercados(
     crecimiento: str = "semestre",
     h_volumen: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-    """Una fila por mercado de exportación: crecimiento en litros y margen (CLP/L y %)."""
-    exp = h[h["canal"] == "Exportación"]
-    exp_volumen = (h if h_volumen is None else h_volumen)
-    exp_volumen = exp_volumen[exp_volumen["canal"] == "Exportación"]
-    col, base, actual = _periodos(crecimiento)
-
-    vol = exp_volumen[(exp_volumen["incluida_volumen"] == 1) & (exp_volumen["anio"] == 2025)].pivot_table(
-        index="pais", columns=col, values="litros_volumen", aggfunc="sum")
-    out = pd.DataFrame({
-        "litros_base": vol[base],
-        "litros_actual": vol[actual],
-    })
-    out["crecimiento_litros_pct"] = (out["litros_actual"] / out["litros_base"] - 1) * 100
-
-    mg = exp[(exp["incluida_margen"] == 1) & (exp["anio"] == 2025)]
-    g = mg.groupby("pais").agg(
-        litros_margen=("litros", "sum"),
-        ingreso_bruto_clp=("ingreso_bruto_clp_factura", "sum"),
-        descuento_clp=("descuento_clp_factura", "sum"),
-        ingreso_clp=(f"ingreso_clp_{fecha}", "sum"),
-        costo_clp=("costo_clp", "sum"),
-        margen_clp=(f"margen_clp_{fecha}", "sum"),
-    )
-    out = out.join(g)
-    out["margen_clp_por_litro"] = out["margen_clp"] / out["litros_margen"]
-    out["margen_pct"] = out["margen_clp"] / out["ingreso_clp"] * 100
-    out["descuento_pct"] = out["descuento_clp"] / out["ingreso_bruto_clp"] * 100
-
-    umbral = out["margen_clp"].sum() / out["litros_margen"].sum()  # promedio de exportación ponderado por litros
-    out["umbral_margen_clp_por_litro"] = umbral
-    out["clasificacion"] = np.select(
-        [(out["crecimiento_litros_pct"] > 0) & (out["margen_clp_por_litro"] >= umbral),
-         (out["crecimiento_litros_pct"] > 0) & (out["margen_clp_por_litro"] < umbral)],
-        ["Creció con buen margen", "Creció dejando poco margen"], "No creció")
-    return out.sort_values("crecimiento_litros_pct", ascending=False)
+    """Vista en CLP de semantica.margen_por_mercado, con los nombres de columna del informe.
+    La fórmula vive solo en src/semantica.py."""
+    base = h if h_volumen is None else h_volumen
+    t = semantica.margen_por_mercado(base, fecha, "CLP", crecimiento, "promedio",
+                                     h_margen=None if h_volumen is None else h)
+    return t.rename(columns={
+        "ingreso_bruto": "ingreso_bruto_clp", "descuento": "descuento_clp", "ingreso": "ingreso_clp",
+        "costo": "costo_clp", "margen": "margen_clp", "margen_por_litro": "margen_clp_por_litro",
+        "umbral": "umbral_margen_clp_por_litro"})
 
 
 def sensibilidad(h: pd.DataFrame, solo_confiable: bool = False) -> pd.DataFrame:

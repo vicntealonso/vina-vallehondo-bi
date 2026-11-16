@@ -20,9 +20,14 @@ informe/_informe_render.html
 node_modules/
 presentacion/_qa.pdf
 
-# informe/: en el repositorio solo van E1_TIN.docx y E1_TIN.pdf; el resto queda local
+# informe/: en el repositorio solo van las carpetas E1/ y E2/ (versiones entregadas); el resto queda local
 informe/*
-!informe/E1_TIN.docx
-!informe/E1_TIN.pdf
+!informe/E1/
+!informe/E2/
 # presentacion/: solo local
 presentacion/
+
+output/*.tmp
+
+# Generador del Word E2: por ahora solo local (versionado en la rama local informe-e2-word)
+entrega2/build_informe_e2.py

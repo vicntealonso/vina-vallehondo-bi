@@ -1,0 +1,18 @@
+﻿id,capa,fuente_o_metrica,que_verifica,si_falla,resultado,detalle
+F1,cruda,SQLite (ERP),La tabla ventas trae sus 11 columnas clave y tiene filas,bloquea,OK,13898 filas; faltan: ninguna
+F2,cruda,CSV de costos,"El CSV trae las columnas de costo, añada y litros por caja",bloquea,OK,84 filas; faltan: ninguna
+F3,cruda,JSON de embarques,Cada línea de embarque trae venta_id y cajas numéricas,bloquea,OK,10776 líneas; cajas no numéricas: 0
+F4,cruda,API dólar observado,Valores del dólar entre 500 y 1.500 CLP/USD,bloquea,OK,"716 días; mín 854.25, máx 1012.76"
+F5,cruda,API dólar observado,La serie 2025 no tiene huecos de más de 5 días corridos,bloquea,OK,mayor hueco: 5 días
+F6,cruda,API dólar observado,"El dólar se obtuvo en vivo de la API (si no, se usa la copia local)",avisa,AVISO,"2024: caché local, 2025: caché local, 2026: caché local"
+M1,modelo,fact_venta_linea,venta_id es único (el grano es una línea de venta),bloquea,OK,"13761 filas, 13761 venta_id"
+M2,modelo,fact_venta_linea,Ninguna llave del hecho queda huérfana en su dimensión,bloquea,OK,"fecha_factura_key: 0, fecha_embarque_key: 0, mercado_id: 0, cliente_id: 0, producto_id: 0, moneda_id: 0, embarque_key: 0"
+M3,modelo,fact_venta_linea,Todas las fechas de factura caen en 2025 (el ejercicio),bloquea,OK,fuera de 2025: 0
+M4,modelo,margen,Toda línea del margen tiene ingreso en CLP y costo (con ambas fechas),bloquea,OK,10344 líneas en el margen
+M5,modelo,margen,Descuento entre 0 % y 30 % en las líneas del margen,bloquea,OK,máx 18%
+M6,modelo,dim_producto,Litros por caja = 9 en todos los productos (12x750 y 6x1500),bloquea,OK,valores: [9.0]
+M7,modelo,fact_venta_linea,Filas del hecho = filas del ERP − duplicados (no se pierden ni duplican),bloquea,OK,13898 − 137 = 13761
+M8,modelo,margen,Ninguna línea del margen usa un dólar fuera de la serie (respaldo),avisa,OK,líneas con respaldo: 0
+C1,consumo,margen por mercado,La suma de los mercados cuadra con el total de exportación,bloquea,OK,"18,868.2 MM vs 18,868.2 MM"
+C2,consumo,cobertura,Cobertura del margen ≥ 70 % de los litros (acuerdo de servicio),avisa,OK,76.3 %
+C3,consumo,margen por mercado,Los 10 mercados de exportación tienen margen calculado,bloquea,OK,10 mercados

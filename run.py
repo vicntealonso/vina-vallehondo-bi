@@ -1,8 +1,10 @@
-"""Cadena completa Viña Vallehondo — Entrega 1 (pregunta P3).
+"""Cadena completa Viña Vallehondo — Entrega 2 (pregunta P3).
 
-Uso:  python run.py
-Lee las 4 fuentes, limpia, integra, construye el modelo dimensional, calcula la métrica bajo
-ambas definiciones, genera los gráficos y deja todas las cifras del informe en output/.
+Uso:  python run.py            (python run.py --offline usa la copia local del dólar)
+Capas: fuentes → cruda (output/capas/1_cruda.sqlite) → depurada (2_depurada.sqlite) → modelo estrella
+(output/modelo_vallehondo.sqlite) → consumo (src/semantica.py → informe en output/ y prototipo app.py).
+Las pruebas de calidad corren en cada capa; si una prueba bloqueante falla, la corrida se detiene y el
+modelo anterior queda intacto. El resultado de las pruebas queda en output/calidad_ultima_corrida.csv.
 """
 import json
 import sys
@@ -10,7 +12,9 @@ import time
 
 import pandas as pd
 
-from src import config, diagrama, extract, figures, metrics, model, transform
+from datetime import datetime
+
+from src import calidad as qa, capas, config, diagrama, diagramas_e2, extract, figures, metrics, model, semantica, transform
 
 
 def fmt(x, dec=0):
@@ -36,6 +40,10 @@ def main():
     dolar, origen_dolar = extract.leer_dolar(offline="--offline" in sys.argv)
     print(f"    SQLite: {len(sql['ventas'])} ventas | CSV: {len(costos_raw)} filas | "
           f"JSON: {len(emb_raw)} líneas de embarque | API dólar: {len(dolar)} días ({origen_dolar})")
+    capas.guardar_cruda(sql, costos_raw, emb_raw, dolar, origen_dolar)
+    reg = qa.Registro()
+    qa.pruebas_fuentes(reg, sql, costos_raw, emb_raw, dolar, origen_dolar)
+    _detener_si_falla(reg, "fuentes", origen_dolar)
 
     print("2/6 Limpieza e integración...")
     productos, costos, info_costos = transform.limpiar_costos(costos_raw)
@@ -45,9 +53,12 @@ def main():
     info_emb["venta_ids_sin_venta"] = sorted(
         emb.loc[~emb["venta_id"].isin(ventas["venta_id"]), "venta_id"].unique().tolist())
     integrado = transform.integrar(ventas, costos, productos, emb, dolar)
+    capas.guardar_depurada(ventas, costos, productos, emb, dolar, integrado)
 
     print("3/6 Modelo dimensional -> output/modelo_vallehondo.sqlite")
     tablas = model.construir(integrado, sql, productos, dolar)
+    qa.pruebas_modelo(reg, tablas, info_ventas)
+    _detener_si_falla(reg, "modelo", origen_dolar)
     model.guardar(tablas)
 
     print("4/6 Métricas (leídas desde el modelo)...")
@@ -62,6 +73,10 @@ def main():
     caso = metrics.caso_negocio(h, t, critico)
     cob = metrics.cobertura(h, info_ventas["filas_ventas"], info_ventas["filas_duplicadas"])
     calidad = metrics.calidad_extra(h)
+    t_sem = semantica.margen_por_mercado(h)
+    qa.pruebas_consumo(reg, t_sem, semantica.total_exportacion(t_sem), h)
+    _detener_si_falla(reg, "consumo", origen_dolar)
+    _guardar_estado(reg, origen_dolar, ok=True)
 
     t.to_csv(config.OUT / "tabla_mercados.csv", encoding="utf-8-sig")
     s.to_csv(config.OUT / "sensibilidad_definiciones.csv", encoding="utf-8-sig")
@@ -88,6 +103,7 @@ def main():
     print("5/6 Gráficos -> output/figuras/")
     figures.generar_todas(h, t, s, caso)
     diagrama.generar()
+    diagramas_e2.generar_todos()
 
     print("6/6 Resumen -> output/resumen.md")
     info = {"costos": info_costos, "embarques": info_emb, "ventas": info_ventas, "calidad": calidad,
@@ -98,7 +114,7 @@ def main():
     pct_fuera = 100 - exp_lineas["Líneas dentro del margen (todos los mercados)"] / info_ventas["filas_ventas"] * 100
     r = t.loc[critico]
     lineas = [
-        "# Resumen de cifras — Entrega 1 (P3)",
+        "# Resumen de cifras — Entrega 2 (P3)",
         "",
         f"Mercado que creció dejando poco margen: **{critico}**",
         f"- Crecimiento en litros S2 vs S1: {fmt(r['crecimiento_litros_pct'], 1)} %",
@@ -150,7 +166,42 @@ def main():
     print(f"Mercado crítico: {critico} | crecimiento {fmt(r['crecimiento_litros_pct'], 1)} % | "
           f"margen {fmt(r['margen_clp_por_litro'])} CLP/L vs {fmt(caso['margen_L_resto'])} del resto | "
           f"descuento extra {fmt(caso['exceso_descuento_clp'] / 1e6)} MM CLP")
+    d = reg.df
     print(f"Líneas fuera del margen: {fmt(pct_fuera, 1)} % | Tiempo total: {time.time() - t0:.1f} s")
+    print(f"Pruebas de calidad: {int((d['resultado'] == 'OK').sum())}/{len(d)} OK, "
+          f"{int((d['resultado'] == 'AVISO').sum())} avisos, 0 fallas → {config.CALIDAD_PATH.relative_to(config.ROOT)}")
+    print("Prototipo: streamlit run app.py")
+
+
+def _guardar_estado(r: qa.Registro, origen_dolar: str, ok: bool, etapa: str = "") -> None:
+    d = r.df
+    config.OUT.mkdir(parents=True, exist_ok=True)
+    d.to_csv(config.CALIDAD_PATH, index=False, encoding="utf-8-sig")
+    previo = json.loads(config.ESTADO_PATH.read_text(encoding="utf-8")) if config.ESTADO_PATH.exists() else {}
+    estado = {
+        "ultima_corrida": datetime.now().isoformat(timespec="seconds"),
+        "corrida_ok": ok,
+        "etapa_fallida": etapa,
+        "origen_dolar": origen_dolar,
+        "dolar_en_vivo": "caché" not in origen_dolar,
+        "pruebas_total": len(d),
+        "pruebas_ok": int((d["resultado"] == "OK").sum()),
+        "pruebas_aviso": int((d["resultado"] == "AVISO").sum()),
+        "pruebas_falla": int((d["resultado"] == "FALLA").sum()),
+        # El prototipo muestra los datos de la última corrida buena
+        "ultima_corrida_buena": datetime.now().isoformat(timespec="seconds") if ok else previo.get("ultima_corrida_buena"),
+    }
+    config.ESTADO_PATH.write_text(json.dumps(estado, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def _detener_si_falla(r: qa.Registro, etapa: str, origen_dolar: str) -> None:
+    fallas = r.bloqueantes_fallidas()
+    if len(fallas):
+        _guardar_estado(r, origen_dolar, ok=False, etapa=etapa)
+        print(f"\nCARGA DETENIDA en la capa '{etapa}': {len(fallas)} prueba(s) bloqueante(s) fallaron.")
+        print(fallas[["id", "que_verifica", "detalle"]].to_string(index=False))
+        print("El modelo anterior y el prototipo quedan con la última corrida buena.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

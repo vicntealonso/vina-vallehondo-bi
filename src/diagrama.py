@@ -145,7 +145,7 @@ def generar():
         ("PK", "producto_id"), ("", "producto · cepa · tipo_vino"), ("", "tier  (Varietal · Reserva · G. Reserva)"),
         ("", "formato · litros_por_caja")])
     mercado = _dim(ax, 960, 470, wd, "dim_mercado", n["dim_mercado"], [("PK", "mercado_id"), ("", "pais · zona · canal")])
-    cliente = _dim(ax, 960, 270, wd, "dim_cliente", n["dim_cliente"], [("PK", "cliente_id"), ("", "nombre · tipo · mercado_id")])
+    cliente = _dim(ax, 960, 270, wd, "dim_cliente", n["dim_cliente"], [("PK", "cliente_id"), ("", "nombre · tipo_cliente")])
 
     mid = lambda d: (d["y0"] + d["y1"]) / 2
     _conector(ax, fact["x0"], fact["y1"] - 120, fecha["x1"], mid(fecha) + 22)

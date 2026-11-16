@@ -1,4 +1,4 @@
-# Resumen de cifras — Entrega 1 (P3)
+# Resumen de cifras — Entrega 2 (P3)
 
 Mercado que creció dejando poco margen: **Corea del Sur**
 - Crecimiento en litros S2 vs S1: 33,8 %

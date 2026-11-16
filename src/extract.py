@@ -43,13 +43,16 @@ def leer_embarques() -> pd.DataFrame:
 
 def _descargar_dolar(anio: int) -> list[dict]:
     url = config.API_DOLAR.format(anio=anio)
-    for intento in range(2):
+    # mindicador.cl es intermitente: a veces acepta la conexión y no responde. Tres intentos con espera
+    # creciente (máximo ~50 s) antes de recurrir a la copia local.
+    for intento in range(3):
         try:
-            r = requests.get(url, timeout=10)
+            r = requests.get(url, timeout=15)
             r.raise_for_status()
             return r.json()["serie"]
         except Exception:
-            time.sleep(2)
+            if intento < 2:
+                time.sleep(2 * (intento + 1))
     raise RuntimeError(f"No se pudo descargar {url}")
 
 
@@ -67,7 +70,7 @@ def leer_dolar(offline: bool = False) -> tuple[pd.DataFrame, str]:
             cache.write_text(json.dumps(serie), encoding="utf-8")
             origenes.append(f"{anio}: API")
         except RuntimeError:
-            offline = True  # si la API falla una vez, el resto de los años se lee de la caché
+            offline = True  # si un año falla tras los reintentos, el resto se lee de la caché (no demorar la corrida)
             if not cache.exists():
                 if anio in config.ANIOS_DOLAR_OPCIONALES:
                     origenes.append(f"{anio}: no disponible")
