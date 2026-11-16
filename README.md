@@ -4,7 +4,7 @@
 
 Este repositorio contiene la cadena completa y el prototipo. La cadena lee las cuatro fuentes, las guarda en una capa cruda, las depura, construye un modelo estrella, corre 17 pruebas de calidad y calcula todas las cifras desde una capa semántica única. El prototipo (`app.py`) lee esa misma capa, así que muestra los mismos números que el informe.
 
-**Informe E1:** [`informe/E1_TIN.pdf`](informe/E1_TIN.pdf).
+**Informes:** E1 en [`informe/E1/`](informe/E1/) ([PDF](informe/E1/E1_TIN.pdf)); E2 en [`informe/E2/`](informe/E2/).
 
 ## Cómo correrlo, paso a paso
 
@@ -48,7 +48,7 @@ Cuando el entorno está activo, la línea de la terminal empieza con `(.venv)`. 
 python run.py
 ```
 
-Lee las cuatro fuentes, construye el modelo, corre las 17 pruebas de calidad y deja las cifras y los gráficos en `output/`. Demora entre 5 y 35 segundos. Termina con algo así:
+Lee las cuatro fuentes, construye el modelo, corre las 17 pruebas de calidad y deja las cifras y los gráficos en `output/`. Demora entre 5 segundos y 1 minuto, según cuánto tarde la API del dólar. Termina con algo así:
 
 ```
 Pruebas de calidad: 17/17 OK, 0 avisos, 0 fallas → output/calidad_ultima_corrida.csv
@@ -89,7 +89,7 @@ Debe terminar con `OK`. Una de ellas rompe una fuente a propósito para comproba
 ## Cuánto demora
 
 - Instalación: unos 25 segundos en un ambiente nuevo (medido el 15-11-2026 clonando la rama desde GitHub).
-- Ejecución de la cadena: unos 5 segundos con `--offline`; entre 15 y 35 segundos en línea, según cuánto tarde la API de mindicador.cl (si no responde, usa la copia local).
+- Ejecución de la cadena: unos 5 segundos con `--offline`; entre 15 segundos y 1 minuto en línea: mindicador.cl es intermitente, así que se reintenta 3 veces antes de usar la copia local.
 - Pruebas automatizadas (`python -m unittest discover -s tests`): unos 25 segundos.
 - Apertura del prototipo: unos 5 segundos la primera vez.
 

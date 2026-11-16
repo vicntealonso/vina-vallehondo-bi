@@ -4,6 +4,21 @@
 
 **Tiempo por persona:** unos 10 minutos.
 
+**Quién puede hacerla:** solo personas ajenas al grupo. No sirven integrantes del V1 ni simularla con IA: el enunciado pide "otro grupo del curso o la contraparte" y que la prueba produzca cambios reales en el prototipo.
+
+**La forma más fácil es un intercambio:** todos los grupos necesitan esta misma prueba para la E2. Ofrezcan probar el prototipo de otro grupo a cambio de que dos de ellos prueben el nuestro.
+
+### Mensaje para invitar a otro grupo (copiar y pegar)
+
+> Hola, somos el Grupo V1 (Viña Vallehondo). Para la E2 necesitamos que dos personas de otro grupo prueben nuestro prototipo: son 10 minutos por persona, responden 3 preguntas mirando la pantalla, sin preparar nada. A cambio, dos de nosotros probamos el de ustedes cuando quieran. ¿Les acomoda hoy o mañana, presencial o por Meet?
+
+### Si es a distancia (Meet o Zoom)
+
+1. Quien conduce corre `python run.py` y `streamlit run app.py`, y comparte **la pestaña del navegador**, no la pantalla completa.
+2. Le da el control remoto a la persona (en Zoom: "Ceder control"). Si no se puede, la persona dicta: "abre el filtro de dólar y elige embarque", y quien conduce hace solo eso, sin sugerir nada.
+3. Las preguntas se pegan en el chat una a la vez. Se cronometra igual.
+4. Con permiso de la persona, conviene grabar la llamada para completar el registro después.
+
 ---
 
 ## Cómo hacerla

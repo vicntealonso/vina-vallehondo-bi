@@ -20,10 +20,10 @@ informe/_informe_render.html
 node_modules/
 presentacion/_qa.pdf
 
-# informe/: en el repositorio solo van E1_TIN.docx y E1_TIN.pdf; el resto queda local
+# informe/: en el repositorio solo van las carpetas E1/ y E2/ (versiones entregadas); el resto queda local
 informe/*
-!informe/E1_TIN.docx
-!informe/E1_TIN.pdf
+!informe/E1/
+!informe/E2/
 # presentacion/: solo local
 presentacion/
 

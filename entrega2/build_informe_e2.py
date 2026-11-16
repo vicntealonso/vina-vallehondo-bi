@@ -1,4 +1,4 @@
-"""Arma informe/Entrega 2.docx a partir de informe/Entrega 1.docx (mismos estilos y formato).
+"""Arma informe/Entrega 2.docx a partir de informe/E1/E1_TIN.docx (mismos estilos y formato).
 
 La E2 es la E1 corregida más tres secciones nuevas (arquitectura, prototipo y adopción). Este script:
 - conserva la portada, el índice, la ficha de la métrica, la bitácora y el acta de la E1;
@@ -27,7 +27,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ))
 from src import config, semantica as sem  # noqa: E402
 
-ORIGEN = RAIZ / "informe" / "Entrega 1.docx"
+ORIGEN = RAIZ / "informe" / "E1" / "E1_TIN.docx"
 SALIDA = RAIZ / "informe" / "Entrega 2.docx"
 FIG = RAIZ / "output" / "figuras"
 CAPTURA = Path(sys.argv[1]) if len(sys.argv) > 1 else RAIZ / "entrega2" / "captura_prototipo_v1.png"
@@ -443,8 +443,7 @@ E_ = [
     LI(B("Quién lo usa primero: "), "el analista de Comercial que hoy arma la planilla y Finanzas, que la recalcula; el Jefe de Operaciones, que "
        "pidió la consultoría, recibe las conclusiones en la misma pantalla."),
     LI(B("Qué puede hacer que no lo use y qué protege esa persona: "), "el área Comercial mide en litros y protege su meta de volumen y su relación con "
-       "los clientes; la pantalla muestra que su mejor mercado en litros es el que menos deja. Por eso muestra los litros junto al margen y permite "
-       "ver todo en dólares, el lenguaje de Comercial."),
+       "los clientes, y su mejor mercado en litros es el que menos deja; por eso la pantalla muestra los litros junto al margen, también en dólares."),
     LI(B("Métrica de adopción y cuándo se mide: "), "cierres en que la reunión comercial–financiera usa la pantalla y Finanzas no recalcula el margen; "
        "meta: 2 de los 3 cierres del primer trimestre 2026."),
     LI(B("Quién lo sostiene cuando el curso termine: "), "el Gerente de Finanzas, dueño de las definiciones, con el soporte TI externo de la viña "
@@ -469,16 +468,24 @@ F_ = [
       B("Pruebas de la última corrida: "), f"{int((Q['resultado'] == 'OK').sum())} de {len(Q)} OK, {int((Q['resultado'] == 'AVISO').sum())} "
       f"avisos y {int((Q['resultado'] == 'FALLA').sum())} fallas (sección B)."),
     P(B("Bitácora de supuestos. "), "Anexo 1, actualizada: el dólar del 1-ene-2025 (30-dic-2024 = 992,12), el cruce embarque–venta "
-      f"({fmt(pct_cruce, 1)} %), la regla de recomendación contra hipótesis y el modelo estrella. ",
-      PEND("[PENDIENTE: nombre de un integrante y fecha en cada fila; «Equipo V1» no vale como dueño según el enunciado]")),
+      f"({fmt(pct_cruce, 1)} %), la regla de recomendación contra hipótesis, el modelo estrella y el punto de equilibrio. Cada "
+      "supuesto tiene un integrante como dueño."),
     P(B("Consistencia: una sola definición por regla. "), "Fecha de conversión: factura. Ventana: S2 contra S1. Umbral: promedio de exportación "
       "ponderado por litros. Equivalencia: 9 L por caja. Las cuatro están definidas en src/semantica.py y src/config.py, y el informe y el prototipo "
       "las leen de ahí."),
     P(B("Declaración de uso de IA. "), "Usamos Claude (Anthropic), mediante Claude Code (Anthropic, 2026), para escribir y depurar el código de la "
-      "cadena, las pruebas de calidad y el prototipo, generar los gráficos y diagramas, y redactar borradores de este informe. Verificamos a mano: ",
-      PEND("[PENDIENTE: lo que efectivamente revisaron, por ejemplo: las cifras clave contra un recálculo independiente, el prototipo con los filtros, "
-           "la corrida desde cero en otro computador y las citas de la contraparte contra el correo]"), "."),
+      "cadena, las pruebas y el prototipo, generar gráficos y diagramas, y redactar borradores del informe. Los supuestos los decidió el "
+      "equipo (dueños en el Anexo 1). Verificamos a mano: que las cifras clave coinciden en el informe, el prototipo y output/resumen.md; el dólar del 30-dic-2024 contra la tabla del SII; cada cita de "
+      "la contraparte contra el acta y los correos; y que la cadena corre desde cero clonando el repositorio, con las mismas cifras."),
 ]
+
+# Dueño de cada supuesto de la bitácora (quien responde por él). Para cambiar a alguien, editar aquí y volver a generar.
+DUENOS = {
+    "1": "Vicente Gajardo", "2": "Vanessa Castro", "4": "Felipe Lobos", "5": "Natalia Moraga",
+    "7": "Vicente Rodríguez", "8": "Vicente Rodríguez", "10": "Vicente Gajardo", "11": "Felipe Lobos",
+    "15": "Vicente Gajardo", "16": "Natalia Moraga", "17": "Vicente Rodríguez",
+    "19": "Natalia Moraga", "20": "Felipe Lobos", "21": "Vanessa Castro", "22": "Vicente Gajardo", "23": "Vanessa Castro",
+}
 
 # ---------------------------------------------------------------- Anexos
 bitacora = OLD[108]
@@ -493,20 +500,20 @@ for fila in tb.rows[1:]:
         for p in celdas[2].paragraphs:
             for r in p.runs:
                 r.text = r.text.replace("~64%", f"{fmt(pct_cruce, 1)} %")
-    for p in celdas[4].paragraphs:  # columna "Quién y cuándo": falta un nombre
+    for p in celdas[4].paragraphs:  # columna "Quién y cuándo": el dueño de cada supuesto con nombre
         for r in p.runs:
             if "Equipo V1" in r.text:
-                r.font.highlight_color = WD_COLOR_INDEX.YELLOW
+                r.text = r.text.replace("Equipo V1", DUENOS[celdas[0].text.strip()])
 nuevas = [
     ["19", "Recomendación solo si la clase se mantiene en las 8 combinaciones de definición; si no, hipótesis",
-     "Retroalimentación E1 y P1 sobre Brasil", "Brasil sería recomendación con la definición principal; hoy queda como hipótesis (2 de 8)", "[PENDIENTE: nombre], 11-11-2026"],
-    ["20", "Modelo estrella: ninguna dimensión apunta a otra", "Retroalimentación E1", "Ninguno en las cifras (verificado)", "[PENDIENTE: nombre], 11-11-2026"],
+     "Retroalimentación E1 y P1 sobre Brasil", "Brasil sería recomendación con la definición principal; hoy queda como hipótesis (2 de 8)", DUENOS["19"] + ", 11-11-2026"],
+    ["20", "Modelo estrella: ninguna dimensión apunta a otra", "Retroalimentación E1", "Ninguno en las cifras (verificado)", DUENOS["20"] + ", 11-11-2026"],
     ["21", "Costo de las gestiones (directorio, renegociación, ERP): ≈ 32 horas-persona por una vez", "La contraparte describió las gestiones, no sus horas",
-     "El valor (286 MM/año) no cambia; cambia solo el costo declarado", "[PENDIENTE: nombre], 15-11-2026"],
+     "El valor (286 MM/año) no cambia; cambia solo el costo declarado", DUENOS["21"] + ", 15-11-2026"],
     ["22", "La pérdida de volumen es pareja en todas las líneas de Corea y esos litros no se venden en otro mercado",
-     "Pedido de la contraparte: mostrar el punto de equilibrio", "Equilibrio 13,2 %; conservador, porque ignora la reventa de esos litros", "[PENDIENTE: nombre], 16-11-2026"],
+     "Pedido de la contraparte: mostrar el punto de equilibrio", "Equilibrio 13,2 %; conservador, porque ignora la reventa de esos litros", DUENOS["22"] + ", 16-11-2026"],
     ["23", "La pantalla reemplaza 22 a 26 horas-persona al mes (planilla de Comercial y recálculo de Finanzas)", "Verbalizado, correo de la contraparte",
-     "Valor operativo además del margen; condicionado a una sola regla de conversión", "[PENDIENTE: nombre], 16-11-2026"],
+     "Valor operativo además del margen; condicionado a una sola regla de conversión", DUENOS["23"] + ", 16-11-2026"],
 ]
 for fila in nuevas:
     nueva = copy.deepcopy(tb.rows[-1]._tr)
@@ -569,6 +576,7 @@ anexo_prueba = [anexo_titulo("Anexo 6 - Prueba de uso"),
                        "cambios hechos al prototipo con su commit]"))]
 bit_titulo = OLD[106]
 reemplazar(bit_titulo, "Anexo 1 - Bitácora de supuestos", "Anexo 1 - Bitácora de supuestos (actualizada E2)")
+reemplazar(OLD[107], " “Equipo V1” = decisión tomada por el grupo completo.", " La última columna indica el integrante dueño de cada supuesto y la fecha.")
 anexo_acta = [OLD[111]] + OLD[112:-1]
 reemplazar(OLD[111], "Anexo 3 - Acta de la reunión con la contraparte", "Anexo 3 - Acta de la reunión con la contraparte")
 
