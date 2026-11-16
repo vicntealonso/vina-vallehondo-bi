@@ -35,8 +35,8 @@ python run.py --offline    # usa directamente la copia local del dólar observad
 
 ## Cuánto demora
 
-- Instalación: unos 15 segundos.
-- Ejecución de la cadena: unos 5 segundos con `--offline`. Sin esa opción, si la API de mindicador.cl no responde, la cadena espera unos 30 segundos antes de usar la copia local.
+- Instalación: unos 25 segundos en un ambiente nuevo (medido el 15-11-2026 clonando la rama desde GitHub).
+- Ejecución de la cadena: unos 5 segundos con `--offline`; entre 15 y 35 segundos en línea, según cuánto tarde la API de mindicador.cl (si no responde, usa la copia local).
 - Pruebas automatizadas (`python -m unittest discover -s tests`): unos 25 segundos.
 - Apertura del prototipo: unos 5 segundos la primera vez.
 

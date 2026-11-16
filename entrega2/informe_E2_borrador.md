@@ -186,6 +186,13 @@ Resultado de la última corrida: **17 de 17 OK** (`output/calidad_ultima_corrida
 - **México:** recomendación de foco comercial. Sus 38.466 litros extra dejaron 89 MM CLP de margen, con un margen por litro sobre el promedio en las 8 definiciones.
 - **Brasil:** hipótesis a validar. Crece con la ventana semestral (78 MM) pero no con T4/T1. Validar con el cierre del T1 2026 antes de invertir.
 
+> **Plan B si la contraparte no responde antes del 18-11.** Usar estos supuestos, marcados como **Inferido** y registrados en la bitácora con nombre y fecha:
+> - **Renegociación:** 2 contratos (Seoul Wine House y K-Vino). Por contrato, unas 16 horas-persona: 8 h del Gerente Comercial, 4 h de Finanzas y 4 h de revisión legal. En total, **≈ 32 horas-persona, por una vez**.
+> - **Operación:** ≈ 1 hora al mes para correr la cadena y revisar las pruebas, a cargo del soporte TI externo.
+> - **Riesgo:** es el costo más relevante y ya está cuantificado. Si Corea compra más de 13,2 % menos, la medida deja de convenir.
+> - **Planilla mensual que reemplaza:** no hay dato de horas. Declararlo como límite en vez de inventar una cifra: "el área Comercial descarga el ERP, cruza las planillas y envía conclusiones una vez al mes (Verbalizado, reunión del 07-09); no conocemos cuántas horas le toma".
+> - **Evaluación de la contraparte:** el enunciado permite citar lo que respondió "en el hilo de correo o en la prueba de uso". Si no hay correo, citar textual a las personas de la prueba de uso, marcado como **Verbalizado (prueba de uso)**, y decir que la contraparte no respondió dentro del plazo.
+
 **¿Cuánto vale cada punto de mezcla?** Si 1 % de los litros de Corea del Sur pasara de Varietal a Gran Reserva, el margen subiría 28,8 MM CLP al año. En toda la exportación, un punto vale 270 MM CLP. Es una palanca adicional al descuento, no un sustituto.
 
 **Prueba ácida (clase 2).**
