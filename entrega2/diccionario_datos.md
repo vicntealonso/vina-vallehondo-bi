@@ -26,8 +26,8 @@ Generado a partir de `output/modelo_vallehondo.sqlite`: cubre todos los campos d
 | `precio_unitario` | Precio de lista por caja | ERP ventas.precio_unitario | Sin “$”; separadores según moneda | CLP o USD por caja |
 | `descuento` | Descuento de la línea | ERP ventas.descuento | 5 %, 5 y 0,05 → 0,05 | fracción |
 | `ratio_monto` | Monto / (cajas × precio × (1 − descuento)) | Calculado | Detecta montos que no cuadran y cajas en botellas | razón |
-| `monto_calza` | El monto cuadra con cajas, precio y descuento | Calculado | |ratio − 1| ≤ 1 % | sí/no |
-| `cajas_calza_embarque` | Las cajas del ERP cuadran con el embarque | ERP + JSON | |cajas| = cajas_embarque (o sin embarque) | sí/no |
+| `monto_calza` | El monto cuadra con cajas, precio y descuento | Calculado | Diferencia entre ratio y 1 de a lo más 1 % | sí/no |
+| `cajas_calza_embarque` | Las cajas del ERP cuadran con el embarque | ERP + JSON | Cajas en valor absoluto = cajas_embarque (o sin embarque) | sí/no |
 | `mercado_embarque_coincide` | El país del embarque coincide con el de la venta | ERP + JSON | No coincide en el 64,1 % de los vínculos | 0/1 |
 | `embarque_posterior_factura` | El embarque es después de la factura | ERP + JSON | fecha_embarque > fecha_factura | 0/1 |
 | `embarque_confiable_sensibilidad` | Línea apta para la prueba de solidez factura vs embarque | Calculado | En el margen, mercado coincide y embarque posterior | 0/1 |
