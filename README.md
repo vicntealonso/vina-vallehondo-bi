@@ -6,32 +6,85 @@ Este repositorio contiene la cadena completa y el prototipo. La cadena lee las c
 
 **Informe E1:** [`informe/E1_TIN.pdf`](informe/E1_TIN.pdf).
 
-## Inicio rápido (tres comandos)
+## Cómo correrlo, paso a paso
+
+Se necesita **Python 3.10, 3.11 o 3.12** y **git**. No uses Python 3.13: algunas librerías fijadas en `requirements.txt` fallan con esa versión. Para ver qué versión tienes: `python3 --version` en Mac o Linux y `py --version` en Windows.
+
+Todos los comandos se escriben en una terminal: **Terminal** en Mac y **PowerShell** en Windows.
+
+### 1. Descargar el repositorio (una sola vez)
 
 ```bash
-pip install -r requirements.txt
-python run.py                 # cadena completa + pruebas de calidad
-streamlit run app.py          # abre el prototipo en http://localhost:8501
+git clone https://github.com/vicntealonso/vina-vallehondo-bi.git
+cd vina-vallehondo-bi
+git checkout entrega2
 ```
 
-## Cómo instalar
+Los datos de origen (`data/raw/`) y la copia del dólar (`data/cache/`) vienen incluidos, así que no hay que descargar nada más.
 
-Entorno validado: Python 3.10. El proyecto tuvo inestabilidad con las versiones
-originalmente fijadas al ejecutarse bajo Python 3.13, por lo que Python 3.10 es
-la referencia para reproducir los resultados.
+### 2. Crear el entorno e instalar las librerías (una sola vez)
+
+**Mac o Linux:**
 
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Cómo correr
+**Windows (PowerShell):**
+
+```powershell
+py -3.12 -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+Cuando el entorno está activo, la línea de la terminal empieza con `(.venv)`. Cada vez que abras una terminal nueva, entra a la carpeta y vuelve a activarlo con `source .venv/bin/activate` en Mac o `.venv\Scripts\Activate.ps1` en Windows, sin repetir la instalación.
+
+### 3. Correr la cadena
 
 ```bash
-python run.py              # intenta la API de mindicador.cl; si no responde, usa data/cache/
-python run.py --offline    # usa directamente la copia local del dólar observado
+python run.py
 ```
+
+Lee las cuatro fuentes, construye el modelo, corre las 17 pruebas de calidad y deja las cifras y los gráficos en `output/`. Demora entre 5 y 35 segundos. Termina con algo así:
+
+```
+Pruebas de calidad: 17/17 OK, 0 avisos, 0 fallas → output/calidad_ultima_corrida.csv
+Prototipo: streamlit run app.py
+```
+
+Si no hay internet o la API del dólar no responde, la cadena usa la copia guardada y dice **16/17 OK, 1 aviso**. Es normal y las cifras no cambian. Para forzar ese modo: `python run.py --offline`.
+
+### 4. Abrir el prototipo
+
+```bash
+streamlit run app.py
+```
+
+Se abre solo en el navegador, en http://localhost:8501. Si no se abre, copia esa dirección en el navegador. Para cerrarlo, vuelve a la terminal y presiona `Ctrl + C`.
+
+### 5. (Opcional) Correr las pruebas automatizadas
+
+```bash
+python -m unittest discover -s tests
+```
+
+Debe terminar con `OK`. Una de ellas rompe una fuente a propósito para comprobar que la carga se detiene.
+
+### Problemas frecuentes
+
+| Síntoma | Solución |
+|---|---|
+| `command not found: python` (Mac) | Activa el entorno (paso 2). Fuera del entorno, en Mac se escribe `python3`. |
+| `ModuleNotFoundError: No module named 'pandas'` (o `streamlit`) | El entorno no está activo. Actívalo y vuelve a correr el comando. |
+| Windows no deja ejecutar `Activate.ps1` | Corre una vez `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` y vuelve a activar. |
+| `py -3.12` no existe en Windows | Usa la versión que tengas entre 3.10 y 3.12, por ejemplo `py -3.11 -m venv .venv`. |
+| Falla `pip install` con Python 3.13 | Instala Python 3.12 desde python.org y crea el entorno de nuevo con esa versión. |
+| El prototipo muestra una franja roja | La última corrida se detuvo por una prueba bloqueante. La franja dice qué falló. Corrige y vuelve a correr `python run.py`. |
+| El puerto 8501 está ocupado | `streamlit run app.py --server.port 8502` |
+| Cambié datos y el prototipo no cambia | Corre `python run.py` de nuevo y recarga la página. |
 
 ## Cuánto demora
 
@@ -53,13 +106,9 @@ Prototipo: streamlit run app.py
 
 Con `--offline` (o si la API no responde) la prueba F6 queda en **AVISO** (16/17 OK): es esperado, el dólar sale de la copia local.
 
-## Cómo abrir el prototipo
+## Qué muestra el prototipo
 
-```bash
-streamlit run app.py
-```
-
-Se abre en el navegador (http://localhost:8501). Una pantalla responde la pregunta: filtros de fecha de conversión (factura o embarque), moneda (pesos o dólares), ventana de crecimiento y umbral de buen margen; la cifra clave con su cobertura; el gráfico que la explica; el corte por mercado y el detalle separado en recomendación, hipótesis a validar y sin acción. La pestaña **Definición y detalle** muestra la comparación factura vs embarque, el valor de cada punto de mezcla, las definiciones y el resultado de las pruebas de calidad.
+Una pantalla responde la pregunta: filtros de fecha de conversión (factura o embarque), moneda (pesos o dólares), ventana de crecimiento y umbral de buen margen; la cifra clave con su cobertura; el gráfico que la explica; el corte por mercado y el detalle separado en recomendación, hipótesis a validar y sin acción. La pestaña **Definición y detalle** muestra la comparación factura vs embarque, el escenario del tope al descuento (cuánto volumen se puede perder antes de que deje de convenir), el valor de cada punto de mezcla, las definiciones y el resultado de las pruebas de calidad.
 
 El prototipo se actualiza solo: lee el modelo que deja `python run.py`, así que basta volver a correr la cadena y recargar la página.
 
@@ -117,7 +166,7 @@ src/calidad.py      las 17 pruebas de calidad, con su acción si fallan
 src/semantica.py    capa semántica: cada métrica definida una sola vez
 src/metrics.py      salidas del informe (usa la capa semántica)
 src/figures.py, src/diagrama.py, src/diagramas_e2.py   gráficos y diagramas
-tests/              15 pruebas automatizadas, incluida una de punta a punta con una fuente rota
+tests/              16 pruebas automatizadas, incluida una de punta a punta con una fuente rota
 ```
 
 ## Definición de la métrica
