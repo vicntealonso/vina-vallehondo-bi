@@ -185,3 +185,15 @@ def escenario_tope(h: pd.DataFrame, mercado: str, tope: float = config.TOPE_DESC
     return {"mercado": mercado, "tope": tope, "recuperable": recuperable, "margen_actual": margen_actual,
             "margen_con_tope": margen_actual + recuperable,
             "caida_volumen_equilibrio_pct": recuperable / (margen_actual + recuperable) * 100}
+
+
+def sensibilidad_volumen(h: pd.DataFrame, mercado: str, tope: float = config.TOPE_DESCUENTO_ESCENARIO,
+                         caidas=(0, 5, 10, 15, 20), moneda: str = "CLP") -> pd.DataFrame:
+    """Cuánto vale el tope si el mercado compra menos. Supone que la caída de volumen es pareja en todas sus
+    líneas (el margen por litro con tope no cambia) y que esos litros no se venden en otro mercado (conservador).
+    Ganancia neta = margen con tope × (1 − caída) − margen actual. Es 0 en el punto de equilibrio."""
+    e = escenario_tope(h, mercado, tope, moneda)
+    filas = [{"caida_volumen_pct": c,
+              "margen_con_tope": e["margen_con_tope"] * (1 - c / 100),
+              "ganancia_neta": e["margen_con_tope"] * (1 - c / 100) - e["margen_actual"]} for c in caidas]
+    return pd.DataFrame(filas)

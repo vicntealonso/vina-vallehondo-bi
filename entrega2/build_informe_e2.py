@@ -44,9 +44,12 @@ TE = sem.margen_por_mercado(h, "embarque")
 TT = sem.margen_por_mercado(h, "factura", "CLP", "trimestre")
 TOT, TOTE = sem.total_exportacion(T), sem.total_exportacion(TE)
 CRIT = "Corea del Sur"
+CITA = "(Verbalizado, correo de la contraparte)"
 RESTO = T.drop(index=CRIT)
 M_RESTO = RESTO["margen"].sum() / RESTO["litros_margen"].sum()
 ESC = sem.escenario_tope(h, CRIT)
+ESC11 = sem.escenario_tope(h, CRIT, 0.11)
+SV = sem.sensibilidad_volumen(h, CRIT, caidas=[0, 5, 10, ESC["caida_volumen_equilibrio_pct"], 20])
 PM = sem.valor_punto_mezcla(h)
 EXTRA = sem.margen_crecimiento(T)
 Q = pd.read_csv(config.CALIDAD_PATH)
@@ -296,7 +299,8 @@ B_ = [
         ["Calidad", "100 % de las pruebas bloqueantes en verde para publicar",
          f"{int(((Q['si_falla'] == 'bloquea') & (Q['resultado'] == 'OK')).sum())} de {int((Q['si_falla'] == 'bloquea').sum())} bloqueantes; "
          f"{int((Q['resultado'] == 'OK').sum())} de {len(Q)} en total"],
-        ["Dueño", "Gerente de Finanzas (dueño de las definiciones); usuario principal: Jefe de Operaciones", "[PENDIENTE: confirmar con la contraparte]"],
+        ["Dueño", "Gerente de Finanzas (dueño de las definiciones); usuario principal: Jefe de Operaciones",
+         "Ante diferencias de cifras se impone el criterio de Finanzas (Verbalizado, correo)"],
     ], [0.9, 3.6, 1.75]),
     P(B("Corre de cero. "), "pip install -r requirements.txt → python run.py → streamlit run app.py. Probado el 15-11-2026 clonando la "
       "rama desde GitHub en una carpeta vacía: instalación 22 s, cadena 34 s, 17 de 17 pruebas OK, 15 de 15 pruebas automatizadas OK y "
@@ -364,8 +368,8 @@ D_ = [
     LI(B("Detalle en tabla: "), "separado en recomendación, hipótesis a validar y sin acción."),
     LI(B("Pie: "), "fuente, fecha de actualización, resultado de las pruebas de calidad y dueño del dato."),
     *FIGURA(CAPTURA, 4.7, "Figura 5. Pantalla principal del prototipo con los datos de la última corrida. Elaboración propia."),
-    P(B("Audiencia y frecuencia. "), "Gerencia Comercial y Jefe de Operaciones, una vez al mes después del cierre de facturación y siempre antes de "
-      "renovar un contrato de exportación. Deciden qué descuento ofrecer en cada mercado y dónde poner el esfuerzo comercial."),
+    P(B("Audiencia y frecuencia. "), "Los gerentes Comercial y de Finanzas y el Jefe de Operaciones, en la reunión comercial–financiera de cada "
+      "mes (hasta 15 días después del cierre), y para preparar la propuesta de descuentos que va al directorio en septiembre u octubre " + CITA + "."),
     P(B("Probado de punta a punta. "), f"El número de la pantalla es el del informe: {fmt(T.loc[CRIT, 'margen_por_litro'])} CLP/L, "
       f"+{fmt(T.loc[CRIT, 'crecimiento_litros_pct'], 1)} %, {fmt(ESC['recuperable'] / 1e6)} MM CLP, {fmt(TOT['margen'] / 1e6)} / "
       f"{fmt(TOTE['margen'] / 1e6)} MM CLP. Se verificó con el probador automático de Streamlit en las 16 combinaciones de filtros, sin errores."),
@@ -376,15 +380,15 @@ D_ = [
         ["Persona (grupo o cargo)", "Tiempo", "Correctas", "Qué no entendió", "Qué cambiamos después"],
         ["[PENDIENTE]", "[PENDIENTE]", "[PENDIENTE]", "[PENDIENTE]", "[PENDIENTE]"],
         ["[PENDIENTE]", "[PENDIENTE]", "[PENDIENTE]", "[PENDIENTE]", "[PENDIENTE]"],
-        ["Benjamín Espinoza (contraparte, correo del 11-11)", "—", "[PENDIENTE]", "[PENDIENTE: respuesta]", "[PENDIENTE]"],
     ], [1.55, 0.6, 0.7, 1.7, 1.7]),
     SUB("Lista de verificación de la clase 7"),
     LI(B("Qué pregunta responde: "), "qué mercados crecieron en litros y cuáles crecieron dejando poco margen."),
-    LI(B("Para quién y con qué frecuencia: "), "Gerencia Comercial y Operaciones; mensual y antes de renovar contratos."),
+    LI(B("Para quién y con qué frecuencia: "), "reunión comercial–financiera mensual y propuesta anual al directorio."),
     LI(B("Dónde está la cifra clave: "), "arriba a la izquierda, bajo los filtros, con su cobertura al lado."),
     LI(B("Si cada gráfico calza con su pregunta: "), "la dispersión responde «¿crece y deja margen?»; las barras, «¿cuánto deja cada mercado?»; la tabla, «¿qué hago con cada uno?»."),
     LI(B("Eje truncado o total que no cierra: "), "las barras parten en cero; la dispersión no y lo declara en pantalla; la suma de los mercados cuadra con el total (prueba C1)."),
-    LI(B("Quién certificó las definiciones del pie: "), PEND("[PENDIENTE: la contraparte o Finanzas, según la respuesta al correo]")),
+    LI(B("Quién certificó las definiciones del pie: "), "la contraparte pide una sola regla de conversión acordada por Comercial y Finanzas, y "
+       "en cifras prima Finanzas; proponemos que el Gerente de Finanzas certifique el dólar de la factura " + CITA + "."),
 ]
 
 # ---------------------------------------------------------------- E. Caso de negocio, recomendación y adopción (E1 corregida)
@@ -396,16 +400,23 @@ reemplazar(p89, "La Ilustración 2", "La Figura 7")
 reemplazar(p89, "la Ilustración 3", "la Figura 8")
 E_ = [
     H1("E. Caso de negocio, recomendación y plan de adopción"),
-    *FIGURA(FIG / "fig1_crecimiento_vs_margen.png", 4.8, "Figura 6. Crecimiento en volumen (%) versus margen por litro (CLP por litro), por mercado en 2025; Brasil marcado como hipótesis y la cobertura de Corea junto a su cifra. Elaboración propia."),
-    *FIGURA(FIG / "fig3_precio_descuento_costo.png", 4.3, "Figura 7. Del precio de lista al margen (CLP por litro): Corea del Sur frente al resto de la exportación, 2025. Elaboración propia."),
-    *FIGURA(FIG / "fig4_litros_mensuales.png", 4.3, "Figura 8. Litros exportados por mes (miles de litros): Corea del Sur frente al promedio de los otros nueve mercados, 2025. Elaboración propia."),
+    *FIGURA(FIG / "fig1_crecimiento_vs_margen.png", 4.4, "Figura 6. Crecimiento en volumen (%) versus margen por litro (CLP por litro), por mercado en 2025; Brasil marcado como hipótesis y la cobertura de Corea junto a su cifra. Elaboración propia."),
+    *FIGURA(FIG / "fig3_precio_descuento_costo.png", 3.8, "Figura 7. Del precio de lista al margen (CLP por litro): Corea del Sur frente al resto de la exportación, 2025. Elaboración propia."),
+    *FIGURA(FIG / "fig4_litros_mensuales.png", 3.8, "Figura 8. Litros exportados por mes (miles de litros): Corea del Sur frente al promedio de los otros nueve mercados, 2025. Elaboración propia."),
     p89, OLD[90],
     SUB("Recomendación, en margen y con su costo"),
-    P(B("Tope de 8 % al descuento de Corea del Sur en los contratos 2026. "), f"Vale {fmt(ESC['recuperable'] / 1e6)} MM CLP de margen al año con el "
-      f"mismo volumen y conviene mientras Corea no compre más de {fmt(ESC['caida_volumen_equilibrio_pct'], 1)} % menos. Cuesta: renegociar 2 "
-      "contratos (Seoul Wine House y K-Vino), ", PEND("[PENDIENTE: horas y cargos según la contraparte; si no responde, supuesto de ≈ 32 horas-persona, "
-      "marcado como inferido]"), ", y cerca de 1 hora al mes de operar la cadena y la pantalla. El riesgo principal, perder volumen, ya está acotado "
-      "por el punto de equilibrio. La viña ya ganó la presencia que buscaba en ese mercado; ahora el foco debe estar en el margen."),
+    P(B("Tope de 8 % al descuento de Corea del Sur en la próxima renovación anual. "), f"Vale {fmt(ESC['recuperable'] / 1e6)} MM CLP de "
+      "margen al año si Corea mantiene su volumen. La contraparte advierte que eso no está garantizado, porque el descuento se dio justamente para "
+      f"crecer allí {CITA}. Por eso medimos cuánto volumen se puede perder: el tope conviene mientras Corea no compre más de "
+      f"{fmt(ESC['caida_volumen_equilibrio_pct'], 1)} % menos (tabla). Cuesta las tres gestiones que describe la contraparte: que el directorio "
+      "apruebe el tope, que el Gerente Comercial renegocie con el importador y que se actualicen las condiciones del cliente en el ERP. No nos "
+      "dieron horas; estimamos ≈ 32 horas-persona por una vez (Inferido), más cerca de 1 hora al mes de operar la cadena y la pantalla."),
+    *TABLA([["Caída de volumen de Corea"] + [f"{fmt(c, 1) if c % 1 else fmt(c)} %" for c in SV["caida_volumen_pct"]],
+            ["Ganancia neta (MM CLP/año)"] + [fmt(round(v / 1e6) + 0) for v in SV["ganancia_neta"]]], [1.9] + [0.87] * 5),
+    P(B("Baja gradual. "), "Como sugiere la contraparte, el descuento puede bajar en dos renovaciones: a 11 % en la primera "
+      f"({fmt(ESC11['recuperable'] / 1e6)} MM CLP/año; conviene si el volumen no cae más de {fmt(ESC11['caida_volumen_equilibrio_pct'], 1)} %) y a 8 % "
+      "en la siguiente, mirando el volumen mensual entre ambas. Supuestos: la caída es pareja en todas las líneas y esos litros no se venden en otro "
+      "mercado. Se simula en el prototipo (pestaña «Definición y detalle»)."),
     P(B("Foco comercial en México (recomendación). "), f"Creció {fmt(mx['crecimiento_litros_pct'], 1)} % en litros con "
       f"{fmt(mx['margen_por_litro'])} CLP/L, sobre el promedio en las 8 definiciones; sus litros extra dejaron {fmt(EXTRA['México'] / 1e6)} MM CLP de margen."),
     P(B("Brasil es una hipótesis a validar, no una recomendación. "), f"Crece {fmt(br['crecimiento_litros_pct'], 1)} % entre semestres, pero cae "
@@ -418,23 +429,29 @@ E_ = [
       f"{fmt(PM.loc[CRIT, 'valor_punto_mezcla'] / 1e6, 1)} MM CLP al año; en toda la exportación, {fmt(PM['valor_punto_mezcla'].sum() / 1e6)} MM "
       "CLP por punto. Es una palanca adicional al descuento, no un sustituto (prototipo, pestaña «Definición y detalle»)."),
     SUB("Prueba ácida"),
-    LI(B("Qué decisión habilita: "), "el descuento máximo de cada mercado al renovar un contrato de exportación."),
-    LI(B("Quién la toma: "), "la Gerencia Comercial, con Finanzas, que tiene la última palabra en las cifras."),
-    LI(B("Con qué frecuencia: "), "en cada renovación de contrato y en la revisión mensual del cierre de facturación."),
-    P(B("Qué reemplaza. "), "La planilla que el área Comercial arma una vez al mes: descarga el ERP a Excel, cruza las planillas y envía conclusiones a "
-      "Operaciones (Verbalizado, reunión del 07-09). Libera ", PEND("[PENDIENTE: horas-persona al mes según la contraparte; si no responde, declararlo "
-      "como límite sin inventar la cifra]"), "."),
+    LI(B("Qué decisión habilita: "), "el descuento máximo de cada mercado en la renovación anual de contratos (en dólares)."),
+    LI(B("Quién la toma: "), "el directorio, que otorgó el descuento a Corea. La propuesta la preparan juntos el Gerente Comercial (riesgo de "
+       "volumen) y el de Finanzas (margen en pesos); si no hay acuerdo prima Finanzas, y el Gerente General la lleva al "
+       "directorio " + CITA + "."),
+    LI(B("Con qué frecuencia: "), "seguimiento mensual en la reunión comercial–financiera (hasta 15 días tras el cierre) para acumular evidencia; la "
+       "condición se cambia una vez al año, con la propuesta lista para el directorio de septiembre u octubre."),
+    P(B("Qué reemplaza. "), "La planilla Excel del margen por mercado, que un analista de Comercial arma en 16 a 20 horas al mes, y las 6 horas que "
+      "Finanzas dedica en cada cierre a recalcularla porque no coincide " + CITA + ": 22 a 26 horas-persona al mes (264 a 312 al año), contra "
+      "1 hora de operación. La condición es una sola regla de conversión acordada entre ambas áreas. El reporte de litros se mantiene porque lo "
+      "conoce el directorio; la pantalla muestra los litros junto al margen por litro."),
     SUB("Plan de adopción"),
-    LI(B("Quién lo usa primero: "), "el Jefe de Operaciones, que pidió la consultoría y hoy no sabe cuánto producir por cepa y tier."),
+    LI(B("Quién lo usa primero: "), "el analista de Comercial que hoy arma la planilla y Finanzas, que la recalcula; el Jefe de Operaciones, que "
+       "pidió la consultoría, recibe las conclusiones en la misma pantalla."),
     LI(B("Qué puede hacer que no lo use y qué protege esa persona: "), "el área Comercial mide en litros y protege su meta de volumen y su relación con "
        "los clientes; la pantalla muestra que su mejor mercado en litros es el que menos deja. Por eso muestra los litros junto al margen y permite "
        "ver todo en dólares, el lenguaje de Comercial."),
-    LI(B("Métrica de adopción y cuándo se mide: "), "cierres mensuales en que se usa la pantalla en vez de la planilla; se mide en los cierres de "
-       "enero y marzo de 2026, con meta de 2 de 3 cierres del primer trimestre."),
+    LI(B("Métrica de adopción y cuándo se mide: "), "cierres en que la reunión comercial–financiera usa la pantalla y Finanzas no recalcula el margen; "
+       "meta: 2 de los 3 cierres del primer trimestre 2026."),
     LI(B("Quién lo sostiene cuando el curso termine: "), "el Gerente de Finanzas, dueño de las definiciones, con el soporte TI externo de la viña "
-       "corriendo python run.py cada mes. ", PEND("[PENDIENTE: confirmar con la contraparte]")),
-    P(B("Evaluación de la contraparte (Verbalizado). "), PEND("[PENDIENTE: cita textual de la respuesta al correo del 11-11 o, si no responde, de la "
-      "prueba de uso, marcada como Verbalizado (prueba de uso)]")),
+       "corriendo python run.py cada mes (Inferido; la contraparte no lo confirmó)."),
+    P(B("Evaluación de la contraparte (Verbalizado). "), "«La herramienta reemplazaría esa planilla y la doble revisión, siempre que el margen se "
+      "calcule en pesos con una sola regla de conversión acordada entre ambas áreas» (Anexo 7). Pidió además el punto de equilibrio de volumen, que "
+      "incorporamos arriba y en el prototipo."),
 ]
 
 # ---------------------------------------------------------------- F. Calidad, bitácora e IA
@@ -444,11 +461,13 @@ F_ = [
     P(B("Cobertura junto a la cifra principal. "), f"El {fmt(T.loc[CRIT, 'margen_por_litro'])} CLP/L de Corea del Sur se calcula sobre el "
       f"{fmt(T.loc[CRIT, 'cobertura_margen_pct'], 1)} % de sus litros; el total de exportación, sobre el {fmt(TOT['cobertura_margen_pct'], 1)} %. "
       "Respecto de la E1 la cobertura no cambió: no cambiaron las fuentes ni las reglas de exclusión, y las correcciones de la E2 (modelo, capas, "
-      "pruebas) no agregan ni quitan registros. De las 13.898 líneas originales, el 25,6 % quedó fuera del cálculo de margen:"),
-    OLD[99], OLD[100], OLD[101], OLD[102], OLD[103], p104,
-    P(B("Pruebas de la última corrida. "), f"{int((Q['resultado'] == 'OK').sum())} de {len(Q)} OK, {int((Q['resultado'] == 'AVISO').sum())} avisos y "
-      f"{int((Q['resultado'] == 'FALLA').sum())} fallas (detalle en la sección B). Al correr sin conexión, F6 queda en aviso porque el dólar sale de la "
-      "copia local; no bloquea la carga."),
+      "pruebas) no agregan ni quitan registros. De las 13.898 líneas originales, el 25,6 % quedó fuera del cálculo de margen: 13,7 % no "
+      "tiene costo para su añada, 5,6 % tiene un monto que no cuadra con cajas, precio y descuento, 5,0 % no tiene moneda, 1,0 % son ventas "
+      "duplicadas y 0,3 % tiene un número de cajas distinto al del embarque."),
+    P("Los litros excluyen solo el 2,3 % de los registros, porque no necesitan costos ni ingresos. La falta de costo, principal motivo, afecta "
+      "entre el 12,5 % y el 16,3 % de los registros de cada mercado: proporciones similares, pero no descartamos que afecten la comparación. ",
+      B("Pruebas de la última corrida: "), f"{int((Q['resultado'] == 'OK').sum())} de {len(Q)} OK, {int((Q['resultado'] == 'AVISO').sum())} "
+      f"avisos y {int((Q['resultado'] == 'FALLA').sum())} fallas (sección B)."),
     P(B("Bitácora de supuestos. "), "Anexo 1, actualizada: el dólar del 1-ene-2025 (30-dic-2024 = 992,12), el cruce embarque–venta "
       f"({fmt(pct_cruce, 1)} %), la regla de recomendación contra hipótesis y el modelo estrella. ",
       PEND("[PENDIENTE: nombre de un integrante y fecha en cada fila; «Equipo V1» no vale como dueño según el enunciado]")),
@@ -482,8 +501,12 @@ nuevas = [
     ["19", "Recomendación solo si la clase se mantiene en las 8 combinaciones de definición; si no, hipótesis",
      "Retroalimentación E1 y P1 sobre Brasil", "Brasil sería recomendación con la definición principal; hoy queda como hipótesis (2 de 8)", "[PENDIENTE: nombre], 11-11-2026"],
     ["20", "Modelo estrella: ninguna dimensión apunta a otra", "Retroalimentación E1", "Ninguno en las cifras (verificado)", "[PENDIENTE: nombre], 11-11-2026"],
-    ["21", "Costo de renegociar: ≈ 32 horas-persona por una vez (solo si la contraparte no responde)", "Sin dato de la contraparte",
+    ["21", "Costo de las gestiones (directorio, renegociación, ERP): ≈ 32 horas-persona por una vez", "La contraparte describió las gestiones, no sus horas",
      "El valor (286 MM/año) no cambia; cambia solo el costo declarado", "[PENDIENTE: nombre], 15-11-2026"],
+    ["22", "La pérdida de volumen es pareja en todas las líneas de Corea y esos litros no se venden en otro mercado",
+     "Pedido de la contraparte: mostrar el punto de equilibrio", "Equilibrio 13,2 %; conservador, porque ignora la reventa de esos litros", "[PENDIENTE: nombre], 16-11-2026"],
+    ["23", "La pantalla reemplaza 22 a 26 horas-persona al mes (planilla de Comercial y recálculo de Finanzas)", "Verbalizado, correo de la contraparte",
+     "Valor operativo además del margen; condicionado a una sola regla de conversión", "[PENDIENTE: nombre], 16-11-2026"],
 ]
 for fila in nuevas:
     nueva = copy.deepcopy(tb.rows[-1]._tr)
@@ -516,18 +539,26 @@ for linea in dicc + ["## fin"]:
     elif linea.startswith("|"):
         bloque.append(linea)
 correo = [anexo_titulo("Anexo 7 - Hilo de correo con la contraparte posterior a la P1"),
-          P(B("Consulta 1 (enviada por el grupo): "), "Estimado Benjamín: […] Nuestro análisis indica que el descuento especial a Corea del Sur (13,5 % "
+          P(B("Consulta del grupo (11-11-2026, enviada por Vanessa Castro): "), "Estimado Benjamín: […] Nuestro análisis indica que el descuento especial a Corea del Sur (13,5 % "
             "frente al 2,6 % del resto de los mercados) representó cerca de $569 millones de margen en 2025, y que limitarlo a un 8 % en los contratos de "
             "2026 permitiría recuperar aproximadamente $286 millones anuales. Considerando estos resultados, nos gustaría saber cómo se abordaría una "
             "decisión de este tipo dentro de la viña si contaran con información mensual del margen por litro de cada mercado. En particular, nos interesa "
             "comprender quiénes participarían, en qué momento se podrían revisar las condiciones comerciales y qué gestiones serían necesarias para "
             "implementar un cambio. Además, quisiéramos conocer si esta herramienta permitiría reemplazar algún reporte o planilla que actualmente utilice "
             "el área Comercial y cuánto tiempo destinan aproximadamente a su elaboración."),
-          P(B("Consulta 2 (enviada el 11-11): "), "Usando solo esta pantalla, ¿le serviría para decidir las condiciones comerciales de los contratos 2026, "
-            "por ejemplo, para identificar qué mercado creció más en litros y cuánto deja por litro frente al resto, si esa conclusión cambia al convertir "
-            "con el dólar del día del embarque y si Brasil es una recomendación o una hipótesis por validar, y qué no entendió o qué le faltó para tomar "
-            "esa decisión?"),
-          P(B("Respuestas: "), PEND("[PENDIENTE: pegar textual las respuestas de la contraparte]"))]
+          P(B("Respuesta de Benjamín Espinoza (contraparte), textual:")),
+          P('Estimados integrantes del Grupo V1:'),
+          P('Gracias por el avance. Respondemos sus consultas en el mismo orden.'),
+          P('Consulta 1. Cómo se tomaría la decisión'),
+          P('a) Quiénes participan. El descuento especial a Corea del Sur lo decidió el directorio para entrar con más fuerza a ese mercado, así que también le corresponde a él modificarlo. Antes de llevarlo al directorio, el Gerente Comercial y el Gerente de Finanzas deberían preparar una propuesta conjunta. Comercial aporta la relación con el importador y el riesgo de perder volumen. Finanzas aporta el margen en pesos. Si las dos áreas no llegan a un acuerdo, se impone el criterio de Finanzas, como ocurre hoy con cualquier diferencia de cifras. El Gerente General lleva la propuesta al directorio.'),
+          P('b) Cuándo se revisaría. Con el margen por litro mensual de cada mercado, lo revisaríamos todos los meses en la reunión comercial–financiera, con un atraso de hasta 15 días después del cierre. Las condiciones comerciales, en cambio, no se pueden cambiar en cualquier momento. Los contratos con importadores se firman en dólares y se renuevan una vez al año, y la negociación de los contratos del año siguiente parte en el último trimestre. Por eso, la propuesta tendría que estar lista para la sesión de directorio de septiembre u octubre. En la práctica, el seguimiento mensual sirve para acumular evidencia durante el año y para detectar a tiempo si el mercado se deteriora. La condición se cambia una sola vez al año.'),
+          P('c) Qué gestiones se necesitan. Primero, que el directorio apruebe el nuevo tope de descuento. Después, que el Gerente Comercial renegocie con el importador coreano, idealmente con una baja gradual y no de golpe. Por último, que se actualicen las condiciones del cliente en el ERP para que la factura salga con el descuento nuevo. Queremos advertirles algo sobre su estimación. Los $286 millones suponen que Corea mantiene el volumen con un descuento menor, y eso no está garantizado: el descuento se dio justamente para crecer allí. Nos ayudaría mucho que mostraran cuánto volumen podríamos perder antes de que el cambio deje de convenir, es decir, el punto de equilibrio.'),
+          P('Consulta 2. Qué reemplazaría'),
+          P('Hoy el margen por mercado se arma en planillas Excel. Un analista del área Comercial descarga las ventas del ERP, las cruza con los costos y con el tipo de cambio, corrige diferencias y manda las conclusiones a Finanzas y Operaciones. Eso le toma entre 16 y 20 horas al mes. Además, Finanzas dedica unas 6 horas al cierre a recalcular las cifras, porque no siempre coinciden con las de Comercial. La herramienta reemplazaría esa planilla y la doble revisión, siempre que el margen se calcule en pesos con una sola regla de conversión acordada entre ambas áreas. El reporte de ventas en litros por mercado lo seguiríamos usando, porque es la métrica que hoy conoce el directorio. Lo ideal es que la pantalla muestre los litros y, al lado, el margen por litro.'),
+          P('Quedamos atentos a la segunda entrega.'),
+          P('Saludos cordiales,'),
+          P('Benjamín Espinoza'),
+]
 anexo_modelo = [anexo_titulo("Anexo 4 - Modelo dimensional técnico")] + FIGURA(
     FIG / "fig0_modelo_dimensional.png", 6.3, "Figura A1. Modelo estrella técnico: fact_venta_linea y sus 6 dimensiones, con llaves y medidas. Elaboración propia.")
 anexo_prueba = [anexo_titulo("Anexo 6 - Prueba de uso"),

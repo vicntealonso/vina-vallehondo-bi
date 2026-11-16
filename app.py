@@ -182,6 +182,31 @@ with tab2:
     st.caption("Elegimos la factura porque la viña cierra el año por factura y es el dato más confiable: "
                "en el 30 % de los embarques la fecha registrada es anterior a la factura.")
 
+    st.subheader(f"Tope al descuento de {critico}: ¿cuánto volumen podemos perder antes de que deje de convenir?")
+    esc_div, esc_u = (1e6, "MM CLP") if moneda == "CLP" else (1e3, "mil USD")
+    s1, s2 = st.columns(2)
+    tope_pct = s1.slider("Tope al descuento (%)", 6.0, 12.0, 8.0, 0.5,
+                         help=f"Hoy {critico} recibe {fmt(c['descuento_pct'], 1)} % de descuento promedio.")
+    caida_pct = s2.slider(f"Caída de volumen de {critico} (%)", 0, 30, 0, 1)
+    e_t = sem.escenario_tope(h, critico, tope_pct / 100, moneda)
+    sv = sem.sensibilidad_volumen(h, critico, tope_pct / 100, caidas=range(0, 31), moneda=moneda)
+    neta = float(sv.loc[sv["caida_volumen_pct"] == caida_pct, "ganancia_neta"].iloc[0])
+    e1, e2, e3 = st.columns(3)
+    e1.metric("Recuperable con el mismo volumen", f"{fmt(e_t['recuperable'] / esc_div, 0)} {esc_u} al año")
+    e2.metric("Punto de equilibrio", f"{fmt(e_t['caida_volumen_equilibrio_pct'], 1)} % menos volumen")
+    e3.metric(f"Ganancia neta con {caida_pct} % menos volumen", f"{fmt(neta / esc_div, 0)} {esc_u} al año",
+              "conviene" if neta > 0 else "no conviene", delta_color="normal" if neta > 0 else "inverse")
+    st.altair_chart(
+        alt.Chart(sv.assign(neta=sv["ganancia_neta"] / esc_div)).mark_line(point=True).encode(
+            x=alt.X("caida_volumen_pct:Q", title=f"Caída de volumen de {critico} (%)"),
+            y=alt.Y("neta:Q", title=f"Ganancia neta ({esc_u} al año)"),
+            tooltip=[alt.Tooltip("caida_volumen_pct:Q", title="Caída %"), alt.Tooltip("neta:Q", title=esc_u, format=",.0f")])
+        + alt.Chart(pd.DataFrame({"y": [0]})).mark_rule(color="#9ca3af").encode(y="y:Q"),
+        use_container_width=True)
+    st.caption(f"Supuestos: la caída es pareja en todas las líneas de {critico} y esos litros no se venden en otro mercado "
+               f"(conservador). Calculado sobre las líneas con margen ({fmt(c['cobertura_margen_pct'], 1)} % de sus litros). "
+               "La contraparte sugiere bajar el descuento de forma gradual: por ejemplo, 11 % en la primera renovación y 8 % en la siguiente.")
+
     st.subheader("¿Cuánto vale cada punto de mezcla?")
     pm = sem.valor_punto_mezcla(h, fecha, moneda)
     st.caption(f"Margen adicional al año si 1 % de los litros de un mercado pasa de Varietal a Gran Reserva, "
@@ -213,6 +238,7 @@ st.caption(
     f"(mindicador.cl, {estado_corrida.get('origen_dolar', 's/i')}). "
     f"**Actualizado:** {estado_corrida.get('ultima_corrida_buena', 's/i').replace('T', ' ')} · "
     f"**Pruebas de calidad:** {estado_corrida.get('pruebas_ok', '?')}/{estado_corrida.get('pruebas_total', '?')} OK. "
-    f"**Dueño del dato:** {config.DUENO_DATO}. **Audiencia:** Gerencia comercial y Operaciones, revisión mensual "
-    f"tras el cierre de facturación y antes de renovar contratos de exportación."
+    f"**Dueño del dato:** {config.DUENO_DATO}. **Audiencia:** reunión comercial–financiera mensual (hasta 15 días "
+    f"después del cierre); la propuesta de descuento la preparan los gerentes Comercial y de Finanzas y la aprueba el "
+    f"directorio en septiembre u octubre, antes de renovar los contratos anuales."
 )

@@ -127,3 +127,14 @@ class ModelInvariantTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SensibilidadVolumenTests(unittest.TestCase):
+    def test_ganancia_neta_es_cero_en_el_punto_de_equilibrio(self):
+        from src import semantica as sem
+        h = sem.cargar_hechos()
+        e = sem.escenario_tope(h, "Corea del Sur")
+        sv = sem.sensibilidad_volumen(h, "Corea del Sur", caidas=[0, e["caida_volumen_equilibrio_pct"], 20])
+        self.assertAlmostEqual(sv["ganancia_neta"].iloc[0], e["recuperable"], places=0)
+        self.assertAlmostEqual(sv["ganancia_neta"].iloc[1], 0, places=0)
+        self.assertLess(sv["ganancia_neta"].iloc[2], 0)
