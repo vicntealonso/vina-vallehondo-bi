@@ -28,3 +28,6 @@ informe/*
 presentacion/
 
 output/*.tmp
+
+# Generador del Word E2: por ahora solo local (versionado en la rama local informe-e2-word)
+entrega2/build_informe_e2.py

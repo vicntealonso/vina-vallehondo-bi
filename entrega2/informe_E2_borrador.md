@@ -1,6 +1,6 @@
 # Entrega 2 — Viña Vallehondo (Grupo V1) · BORRADOR
 
-> **Nota (16-11-2026):** este borrador quedó superado por `informe/Entrega 2.docx`, que se genera con `entrega2/build_informe_e2.py` y ya incorpora la respuesta de la contraparte (`entrega2/respuesta_contraparte.md`): decide el directorio, revisión mensual y cambio anual, punto de equilibrio de volumen y 22 a 26 horas-persona al mes reemplazadas.
+> **Nota (16-11-2026):** este borrador quedó superado por el informe en Word, que ya incorpora la respuesta de la contraparte (`entrega2/respuesta_contraparte.md`): decide el directorio, revisión mensual y cambio anual, punto de equilibrio de volumen y 22 a 26 horas-persona al mes reemplazadas.
 
 > Borrador para pasar al Word. Las marcas **[PENDIENTE]** dependen del equipo o de la contraparte; las páginas "p. X" se completan al diagramar. Todas las cifras salen de `python run.py` (`output/resumen.md`) y se pueden ver en el prototipo (`streamlit run app.py`).
 > Límite: 10 páginas de cuerpo (A cuenta; portada y anexos no). Figuras sugeridas: `output/figuras/e2_*.png` y `fig1`–`fig4`.
