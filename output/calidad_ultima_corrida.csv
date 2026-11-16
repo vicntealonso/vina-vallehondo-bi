@@ -2,7 +2,7 @@
 F1,cruda,SQLite (ERP),La tabla ventas trae sus 11 columnas clave y tiene filas,bloquea,OK,13898 filas; faltan: ninguna
 F2,cruda,CSV de costos,"El CSV trae las columnas de costo, añada y litros por caja",bloquea,OK,84 filas; faltan: ninguna
 F3,cruda,JSON de embarques,Cada línea de embarque trae venta_id y cajas numéricas,bloquea,OK,10776 líneas; cajas no numéricas: 0
-F4,cruda,API dólar observado,Valores del dólar entre 500 y 1.500 CLP/USD,bloquea,OK,"714 días; mín 854.25, máx 1012.76"
+F4,cruda,API dólar observado,Valores del dólar entre 500 y 1.500 CLP/USD,bloquea,OK,"716 días; mín 854.25, máx 1012.76"
 F5,cruda,API dólar observado,La serie 2025 no tiene huecos de más de 5 días corridos,bloquea,OK,mayor hueco: 5 días
 F6,cruda,API dólar observado,"El dólar se obtuvo en vivo de la API (si no, se usa la copia local)",avisa,AVISO,"2024: caché local, 2025: caché local, 2026: caché local"
 M1,modelo,fact_venta_linea,venta_id es único (el grano es una línea de venta),bloquea,OK,"13761 filas, 13761 venta_id"
