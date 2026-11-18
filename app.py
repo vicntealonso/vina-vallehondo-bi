@@ -166,8 +166,10 @@ st.markdown(f"""
   <div class="vh-principal">
     <p class="vh-frase"><b>{esc(critico)}</b> {verbo} {fmt(abs(crec), 1)} % en litros y es el mercado que menos deja por litro.</p>
     <div class="vh-cifra">{fmt(c['margen_por_litro'], dec)}<small>{u}</small></div>
-    <div class="vh-comp"><b>{fmt(brecha, 0)} %</b> frente al resto de la exportación ({fmt(m_resto, dec)} {u}) ·
-      calculado sobre el <b>{fmt(c['cobertura_margen_pct'], 1)} %</b> de sus litros</div>
+    <div class="vh-comp"><b>{fmt(brecha, 0)} %</b> frente al resto de la exportación ({fmt(m_resto, dec)} {u})</div>
+    <div class="vh-comp">Para este margen se usaron <b>{fmt(c['cobertura_margen_pct'], 0)} de cada 100 litros</b> que compró
+      {esc(critico)} ({fmt(c['cobertura_margen_pct'], 1)} %). Los demás no traen el costo de su añada, la moneda o un monto
+      que cuadre, y quedan fuera del cálculo.</div>
     <div class="vh-comparar">
       <div class="vh-barra"><span>{esc(critico)}</span><div class="riel"><div class="relleno" style="width:{c['margen_por_litro'] / max(m_resto, c['margen_por_litro']) * 100:.1f}%;background:{CORAL}"></div></div><span class="val">{fmt(c['margen_por_litro'], dec)}</span></div>
       <div class="vh-barra"><span>Resto de la exportación</span><div class="riel"><div class="relleno" style="width:{m_resto / max(m_resto, c['margen_por_litro']) * 100:.1f}%;background:{GRIS}"></div></div><span class="val">{fmt(m_resto, dec)}</span></div>
@@ -177,12 +179,50 @@ st.markdown(f"""
     {tile("La causa: el descuento", f"{fmt(c['descuento_pct'], 1)} % vs {fmt(desc_resto, 1)} %",
           "Mismo vino, mismo precio de lista y mismo costo que el resto")}
     {tile("Recuperable con tope de 8 %", f"{fmt(esc_tope['recuperable'] / div_mm, 0)} {u_mm} al año",
-          f"Conviene mientras {esc(critico)} no compre más de {fmt(esc_tope['caida_volumen_equilibrio_pct'], 1)} % menos")}
+          f"Conviene mientras {esc(critico)} no compre más de {fmt(esc_tope['caida_volumen_equilibrio_pct'], 1)} % menos. "
+          f"Siempre con el dólar de la factura: no cambia con el filtro de fecha. Simúlelo justo abajo.")}
     {tile("Cobertura de la exportación", f"{fmt(tot['cobertura_margen_pct'], 1)} % de los litros",
           "El resto no tiene costo de su añada, moneda o un monto que cuadre · 9 L por caja")}
   </div>
 </div>
 """, unsafe_allow_html=True)
+
+with st.expander(f"Simular el tope al descuento de {critico}: ¿cuánto volumen podemos perder?"):
+    st.markdown('<div class="vh-nota" style="margin-top:0">Lo pidió la contraparte: lo recuperable supone que el volumen se '
+                'mantiene, y eso no está garantizado. Mueva los controles para ver desde qué caída deja de convenir.</div>',
+                unsafe_allow_html=True)
+    s1, s2 = st.columns(2, gap="large")
+    tope_pct = s1.slider("Tope al descuento (%)", 6.0, 12.0, 8.0, 0.5, format="%.1f %%",
+                         help=f"Hoy {critico} recibe {fmt(c['descuento_pct'], 1)} % de descuento promedio.")
+    caida_pct = s2.slider(f"Caída de volumen de {critico} (%)", 0, 30, 0, 1, format="%d %%")
+    e_t = sem.escenario_tope(h, critico, tope_pct / 100, moneda)
+    sv = sem.sensibilidad_volumen(h, critico, tope_pct / 100, caidas=range(0, 31), moneda=moneda)
+    neta = float(sv.loc[sv["caida_volumen_pct"] == caida_pct, "ganancia_neta"].iloc[0])
+    st.markdown('<div class="vh-fila">'
+                + tile("Recuperable con el mismo volumen", f"{fmt(e_t['recuperable'] / div_mm, 0)} {u_mm} al año")
+                + tile("Punto de equilibrio", f"{fmt(e_t['caida_volumen_equilibrio_pct'], 1)} % menos volumen")
+                + tile(f"Ganancia neta con {caida_pct} % menos volumen", f"{fmt(neta / div_mm, 0)} {u_mm} al año",
+                       "Conviene" if neta > 0 else "<b>No conviene</b>")
+                + "</div>", unsafe_allow_html=True)
+    sv_g = sv.assign(neta=sv["ganancia_neta"] / div_mm,
+                     neta_txt=(sv["ganancia_neta"] / div_mm).map(lambda x: fmt(x, 0)),
+                     caida_txt=sv["caida_volumen_pct"].map(lambda x: f"{x} %"))
+    eje_x = alt.X("caida_volumen_pct:Q", title=f"Caída de volumen de {critico} (%)",
+                  axis=alt.Axis(values=list(range(0, 31, 5)), grid=False))
+    linea = alt.Chart(sv_g).mark_line(color=VINO, strokeWidth=2).encode(
+        x=eje_x, y=alt.Y("neta:Q", title=f"Ganancia neta ({u_mm} al año)", axis=alt.Axis(labelExpr=num_es(0))))
+    puntos_sv = alt.Chart(sv_g).mark_circle(size=70, color=VINO, opacity=0).encode(
+        x=eje_x, y="neta:Q", tooltip=[alt.Tooltip("caida_txt:N", title="Caída de volumen"),
+                                      alt.Tooltip("neta_txt:N", title=f"Ganancia neta ({u_mm})")])
+    actual = alt.Chart(sv_g[sv_g["caida_volumen_pct"] == caida_pct]).mark_circle(
+        size=150, color=VINO, stroke="white", strokeWidth=2, opacity=1).encode(x=eje_x, y="neta:Q")
+    cero = alt.Chart(pd.DataFrame({"y": [0]})).mark_rule(color=INK_3, strokeDash=[4, 4]).encode(y="y:Q")
+    st.altair_chart(tema(cero + linea + puntos_sv + actual, 280), use_container_width=True)
+    st.markdown(f'<div class="vh-nota">Se calcula siempre con el dólar de la factura (la definición del informe), por eso '
+                f'no cambia al mover el filtro «Dólar del día de la». Supuestos: la caída es pareja en todas las líneas de {esc(critico)} y esos litros '
+                f'no se venden en otro mercado (conservador). Calculado sobre las líneas con margen '
+                f'({fmt(c["cobertura_margen_pct"], 1)} % de sus litros). La contraparte sugiere una baja gradual: por ejemplo, '
+                '11 % en la primera renovación y 8 % en la siguiente.</div>', unsafe_allow_html=True)
 
 tab1, tab2 = st.tabs(["Respuesta", "Definición y detalle"])
 
@@ -239,6 +279,24 @@ with tab1:
     seccion("¿Qué hacemos con cada mercado?",
             "<b>Recomendación</b>: la conclusión se mantiene en las 8 combinaciones de definición (2 fechas × 2 ventanas × "
             "2 umbrales). <b>Hipótesis a validar</b>: cambia en alguna; todavía no se recomienda actuar.")
+    for pais_h, r in t[t["estado"] == "Hipótesis a validar"].iterrows():
+        st.info(f"**{pais_h} es hipótesis a validar.** Con la definición del informe queda «{r['clase_principal']}», "
+                f"pero {r['cambia_con']}. Su clase se mantiene solo en {r['combinaciones_con_misma_clase']} de las 8 "
+                "combinaciones; por eso todavía no se recomienda actuar.", icon=":material/help:")
+    def cambia_corto(r):
+        """Texto breve para la celda: qué definición alternativa le cambia la clase al mercado."""
+        if r["combinaciones_con_misma_clase"] == 8:
+            return "Ninguna: igual en las 8"
+        if not r["cambia_con"]:
+            return "Solo al combinar dos alternativas"
+        abrev = {"Creció dejando poco margen": "poco margen", "Creció con buen margen": "buen margen",
+                 "No creció": "no crece"}
+        partes = []
+        for trozo in r["cambia_con"].split("; "):
+            nombre, clase = trozo.replace("con «", "").split("» queda «")
+            partes.append(f"{nombre} → {abrev.get(clase.rstrip('»'), clase.rstrip('»'))}")
+        return "; ".join(partes)
+
     margen_extra = sem.margen_crecimiento(t)
     orden = {"Recomendación": 0, "Hipótesis a validar": 1, "Sin acción": 2}
     tt = t.assign(_o=t["estado"].map(orden)).sort_values(["_o", "crecimiento_litros_pct"], ascending=[True, False])
@@ -253,13 +311,25 @@ with tab1:
         "Cobertura": tt["cobertura_margen_pct"].map(lambda x: f"{fmt(x, 1)} %"),
         f"Margen litros extra ({u_mm})": (margen_extra.loc[tt.index] / div_mm).map(lambda x: fmt(x, 0)),
         "Estable en": tt["combinaciones_con_misma_clase"].astype(str) + " de 8",
+        "Qué la cambia": [cambia_corto(r) for _, r in tt.iterrows()],
     })
+    col_extra = f"Margen litros extra ({u_mm})"
+    ayuda_cols = {
+        col_extra: st.column_config.TextColumn(col_extra, help=(
+            f"Margen que dejaron los litros adicionales del período ({sem.DEFINICIONES['ventana'][ventana][3]}), "
+            "valorizados al margen por litro del mercado. Es 0 si el mercado no creció.")),
+        "Estable en": st.column_config.TextColumn("Estable en", help=(
+            "En cuántas de las 8 combinaciones de definición (2 fechas del dólar × 2 ventanas × 2 umbrales) el mercado "
+            "conserva la clase que tiene con la definición del informe.")),
+        "Qué la cambia": st.column_config.TextColumn("Qué la cambia", help=(
+            "Qué definición alternativa, cambiada de a una, le cambia la clase al mercado.")),
+    }
     tabla.index.name = "Mercado"
     for estado in ["Recomendación", "Hipótesis a validar", "Sin acción"]:
         sub = tabla[tabla["Estado"] == estado].drop(columns="Estado")
         if len(sub):
             st.markdown(f"**{estado}** · {len(sub)} {'mercado' if len(sub) == 1 else 'mercados'}")
-            st.dataframe(sub, use_container_width=True)
+            st.dataframe(sub, use_container_width=True, column_config=ayuda_cols)
     st.markdown(f'<div class="vh-nota">Total exportación: {fmt(tot["margen_por_litro"], dec)} {u} · margen '
                 f'{fmt(tot["margen_pct"], 1)} % · cobertura {fmt(tot["cobertura_margen_pct"], 1)} % de los litros.</div>',
                 unsafe_allow_html=True)
@@ -283,41 +353,6 @@ with tab2:
                          "Clase con factura": a["clasificacion"], "Clase con embarque": b["clasificacion"]})
     comp.index.name = "Mercado"
     st.dataframe(comp, use_container_width=True)
-
-    seccion(f"Tope al descuento de {critico}: ¿cuánto volumen podemos perder?",
-            "Lo pidió la contraparte: los 286 MM suponen que el volumen se mantiene, y eso no está garantizado. "
-            "Mueva los controles para ver desde qué caída deja de convenir.")
-    s1, s2 = st.columns(2, gap="large")
-    tope_pct = s1.slider("Tope al descuento (%)", 6.0, 12.0, 8.0, 0.5, format="%.1f %%",
-                         help=f"Hoy {critico} recibe {fmt(c['descuento_pct'], 1)} % de descuento promedio.")
-    caida_pct = s2.slider(f"Caída de volumen de {critico} (%)", 0, 30, 0, 1, format="%d %%")
-    e_t = sem.escenario_tope(h, critico, tope_pct / 100, moneda)
-    sv = sem.sensibilidad_volumen(h, critico, tope_pct / 100, caidas=range(0, 31), moneda=moneda)
-    neta = float(sv.loc[sv["caida_volumen_pct"] == caida_pct, "ganancia_neta"].iloc[0])
-    st.markdown('<div class="vh-fila">'
-                + tile("Recuperable con el mismo volumen", f"{fmt(e_t['recuperable'] / div_mm, 0)} {u_mm} al año")
-                + tile("Punto de equilibrio", f"{fmt(e_t['caida_volumen_equilibrio_pct'], 1)} % menos volumen")
-                + tile(f"Ganancia neta con {caida_pct} % menos volumen", f"{fmt(neta / div_mm, 0)} {u_mm} al año",
-                       "Conviene" if neta > 0 else "<b>No conviene</b>")
-                + "</div>", unsafe_allow_html=True)
-    sv_g = sv.assign(neta=sv["ganancia_neta"] / div_mm,
-                     neta_txt=(sv["ganancia_neta"] / div_mm).map(lambda x: fmt(x, 0)),
-                     caida_txt=sv["caida_volumen_pct"].map(lambda x: f"{x} %"))
-    eje_x = alt.X("caida_volumen_pct:Q", title=f"Caída de volumen de {critico} (%)",
-                  axis=alt.Axis(values=list(range(0, 31, 5)), grid=False))
-    linea = alt.Chart(sv_g).mark_line(color=VINO, strokeWidth=2).encode(
-        x=eje_x, y=alt.Y("neta:Q", title=f"Ganancia neta ({u_mm} al año)", axis=alt.Axis(labelExpr=num_es(0))))
-    puntos_sv = alt.Chart(sv_g).mark_circle(size=70, color=VINO, opacity=0).encode(
-        x=eje_x, y="neta:Q", tooltip=[alt.Tooltip("caida_txt:N", title="Caída de volumen"),
-                                      alt.Tooltip("neta_txt:N", title=f"Ganancia neta ({u_mm})")])
-    actual = alt.Chart(sv_g[sv_g["caida_volumen_pct"] == caida_pct]).mark_circle(
-        size=150, color=VINO, stroke="white", strokeWidth=2, opacity=1).encode(x=eje_x, y="neta:Q")
-    cero = alt.Chart(pd.DataFrame({"y": [0]})).mark_rule(color=INK_3, strokeDash=[4, 4]).encode(y="y:Q")
-    st.altair_chart(tema(cero + linea + puntos_sv + actual, 280), use_container_width=True)
-    st.markdown(f'<div class="vh-nota">Supuestos: la caída es pareja en todas las líneas de {esc(critico)} y esos litros '
-                f'no se venden en otro mercado (conservador). Calculado sobre las líneas con margen '
-                f'({fmt(c["cobertura_margen_pct"], 1)} % de sus litros). La contraparte sugiere una baja gradual: por ejemplo, '
-                '11 % en la primera renovación y 8 % en la siguiente.</div>', unsafe_allow_html=True)
 
     seccion("¿Cuánto vale cada punto de mezcla?",
             "Margen adicional al año si 1 % de los litros de un mercado pasa de Varietal a Gran Reserva, con los márgenes "

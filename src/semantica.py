@@ -146,8 +146,17 @@ def estado_recomendacion(h: pd.DataFrame) -> pd.DataFrame:
     principal = c["factura|semestre|promedio"]
     estado = np.where(principal == "No creció", np.where(estable, "Sin acción", "Hipótesis a validar"),
                       np.where(estable, "Recomendación", "Hipótesis a validar"))
+    # Qué alternativa, cambiada de a una, le cambia la clase al mercado (para explicar las hipótesis en pantalla)
+    alternativas = {"embarque|semestre|promedio": "Embarque", "factura|trimestre|promedio": "Trimestral",
+                    "factura|semestre|mediana": "Mediana"}
+    cambia_con = pd.Series("", index=c.index, dtype=object)
+    for pais in c.index:
+        partes = [f"con «{nombre}» queda «{c.at[pais, combo]}»" for combo, nombre in alternativas.items()
+                  if c.at[pais, combo] != principal[pais]]
+        cambia_con[pais] = "; ".join(partes)
     return pd.DataFrame({"estado": estado, "clase_principal": principal,
-                         "combinaciones_con_misma_clase": c.eq(principal, axis=0).sum(axis=1)}, index=c.index)
+                         "combinaciones_con_misma_clase": c.eq(principal, axis=0).sum(axis=1),
+                         "cambia_con": cambia_con}, index=c.index)
 
 
 def valor_punto_mezcla(h: pd.DataFrame, fecha: str = "factura", moneda: str = "CLP") -> pd.DataFrame:
