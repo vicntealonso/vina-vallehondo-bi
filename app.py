@@ -134,7 +134,10 @@ elif estado_corrida and not estado_corrida.get("dolar_en_vivo", True):
 with st.container(border=True):
     f1, f2, f3, f4 = st.columns(4)
     fecha = f1.radio("Dólar del día de la", ["factura", "embarque"], horizontal=True,
-                     format_func=lambda x: {"factura": "Factura", "embarque": "Embarque"}[x])
+                     format_func=lambda x: {"factura": "Factura", "embarque": "Embarque"}[x],
+                     help="Con qué dólar observado se pasan a pesos las ventas en dólares. Factura: el día en que se "
+                          "emite la factura de la venta (definición del informe). Embarque: el día en que el vino sale "
+                          "del puerto, en promedio 29 días después de la factura.")
     moneda = f2.radio("Moneda", ["CLP", "USD"], horizontal=True,
                       format_func=lambda x: {"CLP": "Pesos", "USD": "Dólares"}[x])
     ventana = f3.radio("Crecimiento", ["semestre", "trimestre"], horizontal=True,
@@ -163,10 +166,15 @@ crec = c["crecimiento_litros_pct"]
 
 # ---------------------------------------------------------------- la respuesta: una cifra protagonista y tres de apoyo
 verbo = "crece" if crec > 0 else "no crece"
+if crec > 0 and critico == t["crecimiento_litros_pct"].idxmax():
+    frase = (f"<b>{esc(critico)}</b> es el mercado que <b>más creció</b> en litros (+{fmt(crec, 1)} %) "
+             f"y el que <b>menos deja</b> por litro.")
+else:
+    frase = f"<b>{esc(critico)}</b> {verbo} {fmt(abs(crec), 1)} % en litros y es el mercado que menos deja por litro."
 st.markdown(f"""
 <div class="vh-hero">
   <div class="vh-principal">
-    <p class="vh-frase"><b>{esc(critico)}</b> {verbo} {fmt(abs(crec), 1)} % en litros y es el mercado que menos deja por litro.</p>
+    <p class="vh-frase">{frase}</p>
     <div class="vh-cifra">{fmt(c['margen_por_litro'], dec)}<small>{u}</small></div>
     <div class="vh-comp"><b>{fmt(brecha, 0)} %</b> frente al resto de la exportación ({fmt(m_resto, dec)} {u})</div>
     <div class="vh-comp">Para este margen se usaron <b>{fmt(c['cobertura_margen_pct'], 0)} de cada 100 litros</b> que compró
