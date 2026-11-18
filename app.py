@@ -6,6 +6,7 @@ la misma capa que usa el informe. Cuando la cadena vuelve a correr, la pantalla 
 """
 import html
 import json
+from pathlib import Path
 
 import altair as alt
 import pandas as pd
@@ -97,8 +98,9 @@ def tema(chart, alto):
 
 
 @st.cache_data(show_spinner=False)
-def datos(version: float):
-    """version = fecha de modificación del modelo: si la cadena vuelve a correr, se recargan los datos."""
+def datos(version: float, version_semantica: float):
+    """version = fecha de modificación del modelo: si la cadena vuelve a correr, se recargan los datos.
+    version_semantica = la de src/semantica.py: si cambia una definición, también se recargan."""
     h = sem.cargar_hechos()
     return h, sem.estado_recomendacion(h)
 
@@ -106,7 +108,7 @@ def datos(version: float):
 if not config.MODELO_PATH.exists():
     st.error("No hay datos: corra primero `python run.py`.")
     st.stop()
-h, estados = datos(config.MODELO_PATH.stat().st_mtime)
+h, estados = datos(config.MODELO_PATH.stat().st_mtime, Path(sem.__file__).stat().st_mtime)
 estado_corrida = json.loads(config.ESTADO_PATH.read_text(encoding="utf-8")) if config.ESTADO_PATH.exists() else {}
 
 # ---------------------------------------------------------------- título, período y estado de la carga
@@ -223,6 +225,21 @@ with st.expander(f"Simular el tope al descuento de {critico}: ¿cuánto volumen 
                 f'no se venden en otro mercado (conservador). Calculado sobre las líneas con margen '
                 f'({fmt(c["cobertura_margen_pct"], 1)} % de sus litros). La contraparte sugiere una baja gradual: por ejemplo, '
                 '11 % en la primera renovación y 8 % en la siguiente.</div>', unsafe_allow_html=True)
+
+    st.markdown(f"**Descuento por cliente en {critico}**, para preparar la negociación con cada importador:")
+    pc = sem.descuento_por_cliente(h, critico, tope_pct / 100, moneda)
+    tabla_pc = pd.DataFrame({
+        "Tipo": pc["tipo_cliente"],
+        "Litros con margen": pc["litros_margen"].map(lambda x: fmt(x, 0)),
+        f"% de los litros de {critico}": pc["pct_litros"].map(lambda x: f"{fmt(x, 1)} %"),
+        "Descuento promedio": pc["descuento_pct"].map(lambda x: f"{fmt(x, 1)} %"),
+        f"Margen ({u})": pc["margen_por_litro"].map(lambda x: fmt(x, dec)),
+        f"Recuperable con tope de {fmt(tope_pct, 1)} % ({u_mm} al año)": (pc["recuperable"] / div_mm).map(lambda x: fmt(x, 0)),
+    })
+    tabla_pc.index.name = "Cliente"
+    st.dataframe(tabla_pc, use_container_width=True)
+    st.markdown(f'<div class="vh-nota">Mismas fórmulas que el margen por mercado y el recuperable de arriba (dólar de '
+                f'la factura). La suma de los clientes da el total de {critico}.</div>', unsafe_allow_html=True)
 
 tab1, tab2 = st.tabs(["Respuesta", "Definición y detalle"])
 

@@ -53,11 +53,13 @@ DEFINICIONES = {
 }
 
 SQL_HECHOS = """
-SELECT f.*, m.pais, m.canal, fd.anio, fd.semestre, fd.trimestre, fd.mes, p.tier, p.cepa
+SELECT f.*, m.pais, m.canal, fd.anio, fd.semestre, fd.trimestre, fd.mes, p.tier, p.cepa,
+       c.nombre AS cliente, c.tipo_cliente
 FROM fact_venta_linea f
 JOIN dim_mercado m  ON m.mercado_id = f.mercado_id
 JOIN dim_fecha fd   ON fd.fecha_key = f.fecha_factura_key
 JOIN dim_producto p ON p.producto_id = f.producto_id
+LEFT JOIN dim_cliente c ON c.cliente_id = f.cliente_id
 """
 
 
@@ -206,3 +208,21 @@ def sensibilidad_volumen(h: pd.DataFrame, mercado: str, tope: float = config.TOP
               "margen_con_tope": e["margen_con_tope"] * (1 - c / 100),
               "ganancia_neta": e["margen_con_tope"] * (1 - c / 100) - e["margen_actual"]} for c in caidas]
     return pd.DataFrame(filas)
+
+
+def descuento_por_cliente(h: pd.DataFrame, mercado: str, tope: float = config.TOPE_DESCUENTO_ESCENARIO,
+                          moneda: str = "CLP") -> pd.DataFrame:
+    """Detalle del mercado por cliente, para la negociación: litros, descuento, margen por litro (dólar de factura)
+    y lo recuperable con el tope. Usa las mismas fórmulas que margen_por_mercado y escenario_tope."""
+    mg = _exportacion(h)
+    mg = mg[(mg["incluida_margen"] == 1) & (mg["pais"] == mercado)]
+    filas = []
+    for (cliente, tipo), d in mg.groupby(["cliente", "tipo_cliente"], dropna=False):
+        m = _montos(d, "factura", moneda)
+        filas.append({"cliente": cliente, "tipo_cliente": tipo, "litros_margen": m["litros"].sum(),
+                      "descuento_pct": m["descuento"].sum() / m["ingreso_bruto"].sum() * 100,
+                      "margen_por_litro": m["margen"].sum() / m["litros"].sum(),
+                      "recuperable": escenario_tope(d, mercado, tope, moneda)["recuperable"]})
+    out = pd.DataFrame(filas).set_index("cliente").sort_values("litros_margen", ascending=False)
+    out["pct_litros"] = out["litros_margen"] / out["litros_margen"].sum() * 100
+    return out
