@@ -26,8 +26,9 @@ Dos personas de otros grupos del curso respondieron tres preguntas usando solo e
 | No se entiende por qué Brasil es hipótesis | Junto a «2 de 8» se muestra con qué definiciones cambia (trimestral y mediana) | b5f5f80 |
 | El recuperable no cambia con el filtro del dólar | Nota: se calcula siempre con el dólar de la factura | b5f5f80 |
 | Columna «Margen litros extra» poco clara | Ayuda (tooltip) en la columna | b5f5f80 |
-| El simulador está escondido en la segunda pestaña | Acceso al simulador desde la pantalla principal | 25d4735 |
-| La cobertura cuesta entenderla | Redactada como «73 de cada 100 litros» | 25d4735 |
+| El simulador está escondido en la segunda pestaña | Acceso al simulador desde la pantalla principal | b5f5f80 |
+| La cobertura cuesta entenderla | Redactada como «73 de cada 100 litros» | b5f5f80 |
+| Para negociar faltaba el descuento por cliente dentro de Corea | Tabla de descuento, margen y recuperable por cliente de Corea, dentro del simulador | 25d4735 |
 | La cifra clave no dice que Corea es la que más creció | Ahora dice «el mercado que más creció en litros» | c47d65e |
 | No se entiende «Embarque» | Ayuda en el filtro que explica factura y embarque | c47d65e |
 | Falta contexto del rubro | No se agregó: la pantalla es para la gerencia de la viña | — |
