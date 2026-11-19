@@ -17,7 +17,6 @@ Todos los comandos se escriben en una terminal: **Terminal** en Mac y **PowerShe
 ```bash
 git clone https://github.com/vicntealonso/vina-vallehondo-bi.git
 cd vina-vallehondo-bi
-git checkout entrega2
 ```
 
 Los datos de origen (`data/raw/`) y la copia del dólar (`data/cache/`) vienen incluidos, así que no hay que descargar nada más.
