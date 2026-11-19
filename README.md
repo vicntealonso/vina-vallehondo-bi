@@ -4,7 +4,7 @@
 
 Este repositorio contiene la cadena completa y el prototipo. La cadena lee las cuatro fuentes, las guarda en una capa cruda, las depura, construye un modelo estrella, corre 17 pruebas de calidad y calcula todas las cifras desde una capa semántica única. El prototipo (`app.py`) lee esa misma capa, así que muestra los mismos números que el informe.
 
-**Informes:** E1 en [`informe/E1/`](informe/E1/) ([PDF](informe/E1/E1_TIN.pdf)); E2 en [`informe/E2/`](informe/E2/).
+**Informes:** E1 en [`informe/E1/`](informe/E1/) ([PDF](informe/E1/E1_TIN.pdf)); E2 en [`informe/E2/`](informe/E2/) ([PDF](informe/E2/E2_GV1.pdf)). Prototipo publicado: https://vina-vallehondo-bi.streamlit.app/
 
 ## Cómo correrlo, paso a paso
 
